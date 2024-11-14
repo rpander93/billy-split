@@ -1,14 +1,8 @@
-import {
-  Links,
-  Meta,
-  Outlet,
-  Scripts,
-  ScrollRestoration,
-} from "@remix-run/react";
+import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "@remix-run/react";
 import type { LinksFunction } from "@remix-run/node";
-
-import "./tailwind.css";
-
+import styles from "./root.css?url"
+import { css } from "~/styled-system/css";
+ 
 export const links: LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {
@@ -18,8 +12,12 @@ export const links: LinksFunction = () => [
   },
   {
     rel: "stylesheet",
-    href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap",
+    href: "https://fonts.googleapis.com/css2?family=Lato:wght@700;900&family=Nanum+Pen+Script&family=PT+Serif&display=swap",
   },
+  {
+    rel: "stylesheet",
+    href: styles,
+  }
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -31,7 +29,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body>
+      <body className={css({ display: "flex", flexDirection: "column", maxWidth: "768px", marginX: "auto", padding: 4 })}>
         {children}
         <ScrollRestoration />
         <Scripts />
