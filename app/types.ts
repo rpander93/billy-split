@@ -19,9 +19,7 @@ export interface OnlineScannedBill extends ScannedBill {
 export interface StateLineItem {
   description: string;
   amount: string;
-  unit_price: string;
   total_price: string;
-  is_deleted: boolean;
 }
 
 export interface ServerSubmitResponse {

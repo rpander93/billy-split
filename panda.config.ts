@@ -2,7 +2,10 @@ import { defineConfig, defineGlobalStyles } from "@pandacss/dev";
 
 export default defineConfig({
   globalCss: defineGlobalStyles({
-    'body': {
+    html: {
+      '--global-font-body': 'PT Serif, sans-serif',
+    },
+    body: {
       backgroundColor: 'background',
     }
   }),
@@ -28,25 +31,22 @@ export default defineConfig({
       tokens: {
         colors: {
           background: {
-            value: "#006D77",
-          },
-          card: {
-            value: "#fff",
+            value: "#f4ebd9",
           },
           primary: {
-            value: "#000",
+            value: "#252525",
           },
           text: {
-            value: "#fff",
-          },
-          ["text-inverse"]: {
             value: "#000",
           },
-          ["text-header"]: {
+          ["text-inverse"]: {
             value: "#fff",
           },
+          ["text-header"]: {
+            value: "#000",
+          },
           ["text-subtle"]: {
-            value: "#fff",
+            value: "#000",
           },
         },
       },

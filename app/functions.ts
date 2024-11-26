@@ -30,3 +30,11 @@ export function formatCurrencyWithoutSymbol(value: string | number) {
     ? parsedValue.toLocaleString("nl-NL", { minimumFractionDigits: 2 })
     : parsedValue;
 }
+
+export function extractFirstUrl(text: string) {
+  const urlRegex = /(https?:\/\/[^\s]+)/;
+  const match = text.match(urlRegex);
+
+  // Return the matched URL or null if no URL is found
+  return match ? match[0] : null;
+}

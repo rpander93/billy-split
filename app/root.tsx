@@ -12,7 +12,7 @@ export const links: LinksFunction = () => [
   },
   {
     rel: "stylesheet",
-    href: "https://fonts.googleapis.com/css2?family=Lato:wght@700;900&family=Nanum+Pen+Script&family=PT+Serif&display=swap",
+    href: "https://fonts.googleapis.com/css2?family=Lato&family=Nanum+Pen+Script&family=PT+Serif&family=Inconsolata&display=swap",
   },
   {
     rel: "stylesheet",
@@ -29,7 +29,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body className={css({ display: "flex", flexDirection: "column", maxWidth: "768px", marginX: "auto", padding: 4 })}>
+      <body className={css({ display: "flex", flexDirection: "column", maxWidth: "576px", marginX: "auto", padding: 4 })}>
         {children}
         <ScrollRestoration />
         <Scripts />
