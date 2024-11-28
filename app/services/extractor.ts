@@ -66,9 +66,9 @@ function parseAzureResponse(response: AnalyzeResponseType): ScannedBill {
     line_items:
       // @ts-expect-error no exhaustive types for document
       document.fields.Items.valueArray?.map(element => ({
-        description: element.valueObject.Description?.valueString ?? "Unknown item",
+        description: element.valueObject.Description?.valueString ?? "Unknown",
         amount: element.valueObject.Quantity?.valueNumber ?? 1,
-        total_price: element.valueObject.TotalPrice.valueNumber,
+        total_price: element.valueObject.TotalPrice?.valueNumber ?? 0.0,
       })) ?? [],
   };
 }

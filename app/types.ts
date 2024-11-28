@@ -12,6 +12,7 @@ export interface ScannedBill {
 export interface OnlineScannedBill extends ScannedBill {
   id: string;
   created_on: number;
+  date: string;
   share_code: string;
   file_name: string;
 }

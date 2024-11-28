@@ -1,17 +1,20 @@
 import { ActionFunctionArgs, LoaderFunctionArgs, redirect } from "@remix-run/node";
 import { Form, useLoaderData } from "@remix-run/react";
 import React, { useRef, useState } from "react";
+import { z } from "zod";
 
 import { Box } from "~/components/box";
 import { Button, ButtonGroup } from "~/components/button";
+import { CurrencyInput } from "~/components/currency-input";
 import { Divider } from "~/components/divider";
 import { FormHelper } from "~/components/form-helper";
 import { FormLabel } from "~/components/form-label";
 import { ReceiptBox } from "~/components/receipt-box";
 import { TextInput } from "~/components/text-input";
 import { Typography } from "~/components/typography";
-import { extractFirstUrl, formatCurrency, removeCurrencySymbol, tryParseFloat } from "~/functions";
+import { extractFirstUrl, formatCurrency, formatCurrencyWithoutSymbol, removeCurrencySymbol, tryParseFloat } from "~/functions";
 import { findScannedBill } from "~/services/bills";
+import { ScannedBill } from "~/types";
 
 export async function loader({ params }: LoaderFunctionArgs) {
   const element = await findScannedBill(params.entryId as string);
@@ -20,7 +23,11 @@ export async function loader({ params }: LoaderFunctionArgs) {
 }
 
 export async function action({ request }: ActionFunctionArgs) {
-  console.log(await request.formData());
+  const input = await request.formData();
+  const result = submitShape.safeParse(input);
+  if (false === result.success) throw new Response("Invalid form data received", { status: "400" });
+
+  // ..
 
   return null;
 }
@@ -29,8 +36,9 @@ export default function CreatePage() {
   const { element } = useLoaderData<typeof loader>();
 
   const tipAmountRef = useRef<HTMLInputElement>(null);
-  const [items, setItems] = useState<ItemState[]>(element.line_items);
+  const [items, setItems] = useState<ItemState[]>(() => createItemState(element.line_items));
   const [feeAmount, setFeeAmount] = useState(0);
+  const [currency, setCurrency] = useState(element.currency ?? "EUR");
 
   const handleClickCreate = () => {
     setItems([
@@ -42,11 +50,7 @@ export default function CreatePage() {
   const handlePaste: React.ClipboardEventHandler<HTMLInputElement> = event => {
     const value = event.clipboardData.getData("text");
     const urlFoundInText = extractFirstUrl(value);
-    const $inputElement = event.currentTarget.firstChild;
-
-    if ($inputElement === null) {
-      return;
-    }
+    const $inputElement = event.target;
 
     requestAnimationFrame(() => {
       const nextValue = urlFoundInText !== null && urlFoundInText.length > 0 ? urlFoundInText : value;
@@ -77,16 +81,27 @@ export default function CreatePage() {
               required
               textAlign="center"
             />
+            <Box columnGap={2}>
+              <TextInput
+                alignSelf="center"
+                defaultValue={element.date}
+                fontSize="md"
+                fontWeight="400"
+                name="date"
+                type="date"
+                textAlign="center"
+              />
 
-            <TextInput
-              alignSelf="center"
-              defaultValue={element.created_on}
-              fontSize="md"
-              fontWeight="400"
-              name="datetime"
-              type="datetime-local"
-              textAlign="center"
-            />
+              <CurrencyInput
+                name="currency"
+                onChange={event => {
+                  setCurrency(event.target.value);
+                  tipAmountRef.current!.value = formatCurrency(feeAmount, event.target.value);
+                }}
+                required
+                value={currency}
+              />
+            </Box>
           </Box>
 
           <Box flexDirection="column" marginY={6} rowGap={2}>
@@ -94,13 +109,13 @@ export default function CreatePage() {
               const handleChangeAmount = (event: React.FocusEvent<HTMLInputElement>) => {
                 const amount = updateAmount(item.amount ?? 0, event.target.value);
                 setItems(items.with(index, { ...item, amount }));
-                event.target.value = String(amount) + "x";
+                event.target.value = String(amount);
               }
 
               const handleChangeTotalPrice = (event: React.FocusEvent<HTMLInputElement>) => {
                 const total_price = updateTotalPrice(item.total_price ?? 0, event.target.value);
                 setItems(items.with(index, { ...item, total_price }));
-                event.target.value = formatCurrency(total_price, "EUR");
+                event.target.value = formatCurrencyWithoutSymbol(total_price);
               };
 
               const handleChangeDescription = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -108,14 +123,15 @@ export default function CreatePage() {
               };
 
               const handleClickDelete = () => {
-                setItems(items.with(index, { ...item, is_deleted: true }));
+                setItems(items.with(index, { ...item, is_deleted: !item.is_deleted }));
               };
 
               return (
                 <React.Fragment key={index}>
                   <Box alignItems="center" flexDirection="row" columnGap={2}>
                     <TextInput
-                      defaultValue={item.amount !== undefined ? String(item.amount) + "x" : undefined}
+                      defaultValue={item.amount !== undefined ? String(item.amount) : undefined}
+                      disabled={item.is_deleted}
                       name={`line_items[${index}][amount]`}
                       onBlur={handleChangeAmount}
                       placeholder="-x"
@@ -126,19 +142,22 @@ export default function CreatePage() {
                     />
                     <TextInput
                       defaultValue={item.description}
+                      disabled={item.is_deleted}
                       name={`line_items[${index}][description]`}
                       onChange={handleChangeDescription}
                       placeholder="Item"
                       required
                       space="small"
-                      size={(item.description?.length ?? 0) + 4}
+                      size={Math.min((item.description?.length ?? 0) + 4, 20)}
                     />
                     <TextInput
-                      defaultValue={item.total_price !== undefined ? formatCurrency(item.total_price, "EUR") : item.total_price}
+                      defaultValue={item.total_price !== undefined ? formatCurrencyWithoutSymbol(item.total_price) : item.total_price}
+                      disabled={item.is_deleted}
                       marginLeft="auto"
+                      inputMode="decimal"
                       name={`line_items[${index}][total_price]`}
                       onBlur={handleChangeTotalPrice}
-                      placeholder={formatCurrency(0, "EUR")}
+                      placeholder={formatCurrencyWithoutSymbol(0)}
                       required
                       size={8}
                       space="small"
@@ -146,7 +165,7 @@ export default function CreatePage() {
                     />
 
                     <Button onClick={handleClickDelete} size="none" variant="tertiary">
-                      🗑️
+                      {item.is_deleted ? "♻️" : "🗑️"}
                     </Button>
                   </Box>
 
@@ -163,10 +182,10 @@ export default function CreatePage() {
           <Box flexDirection="column" rowGap={1}>
             <Box flexDirection="row" justifyContent="space-between">
               <Typography>Subtotal</Typography>
-              <TextInput disabled name="subtotal_price" space="small" size={8} textAlign="right" value={formatCurrency(subTotalPrice, "EUR")} />
+              <TextInput disabled name="subtotal_price" space="small" size={8} textAlign="right" value={formatCurrency(subTotalPrice, currency)} />
             </Box>
             <Box alignItems="center" flexDirection="row" justifyContent="space-between">
-              <Typography>Service fee</Typography>
+              <Typography>Service</Typography>
               <Box alignItems="center" columnGap={2}>
                 <ButtonGroup>
                   {AVAILABLE_TIPS.map((element, index) => {
@@ -177,7 +196,7 @@ export default function CreatePage() {
 
                       if (tipAmountRef.current !== null) {
                         setFeeAmount(nextTipAmount);
-                        tipAmountRef.current.value = formatCurrency(nextTipAmount, "EUR");
+                        tipAmountRef.current.value = formatCurrency(nextTipAmount, currency);
                       }
                     };
 
@@ -189,12 +208,20 @@ export default function CreatePage() {
                   })}
                 </ButtonGroup>
 
-                <TextInput ref={tipAmountRef} name="service_fee" defaultValue={formatCurrency(feeAmount, "EUR")} space="small" size={8} textAlign="right" />
+                <TextInput
+                  ref={tipAmountRef}
+                  defaultValue={formatCurrency(feeAmount, currency)}
+                  inputMode="decimal"
+                  name="service_fee"
+                  space="small"
+                  size={8}
+                  textAlign="right"
+                />
               </Box>
             </Box>
             <Box flexDirection="row" justifyContent="space-between">
               <Typography>Total</Typography>
-              <TextInput color="black" disabled fontWeight="bold" size={8} space="small" textAlign="right" value={formatCurrency(totalPrice, "EUR")} />
+              <TextInput color="black" disabled fontWeight="bold" size={8} space="small" textAlign="right" value={formatCurrency(totalPrice, currency)} />
             </Box>
           </Box>
         </ReceiptBox>
@@ -210,6 +237,19 @@ export default function CreatePage() {
     </Form>
   );
 }
+
+const submitShape = z.object({
+  name: z.string(),
+  datetime: z.string(),
+  service_fee: z.number().nullable(),
+  payment_method: z.string(),
+  line_items: z.array(z.object({
+    amount: z.number().min(1),
+    description: z.string(),
+    total_price: z.number(),
+    is_deleted: z.boolean(),
+  })),
+});
 
 interface ItemState {
   amount: number | undefined;
@@ -239,6 +279,10 @@ function updateTotalPrice(current: number, input: string) {
 
 function formatPercentage(input: number) {
   return `${input * 100} %`;
+}
+
+function createItemState(items: ScannedBill["line_items"]) {
+  return items.map(x => ({ ...x, is_deleted: false }));
 }
 
 const AVAILABLE_TIPS = [0.05, 0.1, 0.15, 0.2];

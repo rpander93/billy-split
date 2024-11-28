@@ -1,7 +1,7 @@
 import { cva } from "~/styled-system/css";
 import { styled } from "~/styled-system/jsx";
 
-const inputCss = cva({
+export const inputCss = cva({
   base: {
     backgroundColor: "white",
     borderColor: "gray.300",

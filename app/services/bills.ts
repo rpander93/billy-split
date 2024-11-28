@@ -10,11 +10,12 @@ export async function addScannedBill(element: ScannedBill, file: File): Promise<
   const fileName = shareCode + fileExtension;
 
   const retVal: OnlineScannedBill = {
+    ...element,
     id: shareCode,
     file_name: shareCode + fileExtension,
     created_on: Date.now() / 1000,
+    date: element.date !== null ? element.date : formatYMD(),
     share_code: shareCode,
-    ...element,
   };
 
   await Promise.all([
@@ -44,4 +45,13 @@ function createShareCode(length: number): string {
   }
 
   return result;
+}
+
+function formatYMD() {
+  const currentDate = new Date();
+  const localYear = currentDate.getFullYear();
+  const localMonth = currentDate.getMonth() + 1; // Note: months are 0-indexed
+  const localDay = currentDate.getDate();
+
+  return `${localYear}-${localMonth}-${localDay}`;
 }
