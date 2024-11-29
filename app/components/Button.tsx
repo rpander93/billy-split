@@ -9,7 +9,7 @@ interface ButtonProps {
   size?: "sm" | "md" | "none";
   startDecorator?: React.ReactNode;
   type?: "submit" | "button" | "reset";
-  variant?: "primary" | "secondary" | "tertiary";
+  variant?: "primary" | "secondary" | "ghost";
 }
 
 export function Button({ children, startDecorator, onClick, position = "standalone", size = "md", type = "button", variant = "primary" }: ButtonProps) {
@@ -27,24 +27,37 @@ export const ButtonGroup = Box;
 const buttonStyle = cva({
   base: {
     alignItems: "center",
-    alignSelf: "flex-start",
+    borderRadius: "md",
     columnGap: 2,
     cursor: "pointer",
-    display: "flex",
+    display: "inline-flex",
+    justifyContent: "center",
+    "_disabled": {
+      opacity: 0.5,
+      pointerEvents: "none",
+    },
   },
   variants: {
     variant: {
       primary: {
-        backgroundColor: "primary",
-        borderWidth: 1,
+        backgroundColor: "black",
+        "_hover": {
+          backgroundColor: "gray.900",
+        },
       },
       secondary: {
         borderColor: "gray.300",
         borderStyle: "solid",
         borderWidth: 1,
+        "_hover": {
+          backgroundColor: "gray.50",
+        },
       },
-      tertiary: {
-        // ..
+      ghost: {
+        borderWidth: 0,
+        "_hover": {
+          backgroundColor: "gray.50",
+        },
       },
     },
     position: {
@@ -58,11 +71,14 @@ const buttonStyle = cva({
         borderRadius: 0,
       },
       end: {
+        borderTopLeftRadius: 0,
+        borderBottomLeftRadius: 0,
         borderTopRightRadius: "md",
         borderBottomRightRadius: "md",
       },
       standalone: {
         borderRadius: "md",
+        borderWidth: 1,
       },
     },
     size: {

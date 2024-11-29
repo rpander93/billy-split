@@ -10,8 +10,17 @@ export const inputCss = cva({
     borderWidth: 1,
     paddingX: 2,
     paddingY: 1,
+    "_disabled": {
+      opacity: 0.5,
+    },
+    "_focus": {
+      boxShadow: "0 0 #0000",
+      outlineWidth: "1.5px",
+      outlineStyle: "solid",
+      outlineColor: "gray.500",
+    },
     "_readOnly": {
-      color: "gray.500",
+      cursor: "not-allowed",
     },
   },
   variants: {
