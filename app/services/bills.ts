@@ -1,8 +1,43 @@
-import { OnlineScannedBill, ScannedBill } from "~/types";
+import { OnlineScannedBill, OnlineSubmittedBill, ScannedBill, SubmittedBill } from "~/types";
 import { database } from "./database";
 import { upload } from "./files";
 
 const CONTAINER_SCANS = process.env.AZURE_COSMOS_CONTAINER_SCANS as string;
+const CONTAINER_ENTRIES = process.env.AZURE_COSMOS_CONTAINER_ENTRIES as string;
+
+export async function addSubmittedBill(scannedBillId: string, submitted: SubmittedBill) {
+  const scanned = await findScannedBill(scannedBillId);
+  if (scanned === null) throw new Error(`Cannot find scanned item with id "${scannedBillId}"`);
+
+  await Promise.all([
+    database.container(CONTAINER_ENTRIES).items.upsert<OnlineSubmittedBill>({
+      ...scanned,
+      ...submitted,
+      line_items: submitted.line_items
+        .filter(x => x.is_deleted === false)
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        .map(({ is_deleted, ...item }, index) => ({
+          ...item,
+          index,
+          unit_price: item.total_price / item.amount,
+        })),
+      number_of_payments: 0,
+      payment_items: [],
+    }),
+    database.container(CONTAINER_SCANS)
+      .deleteAllItemsForPartitionKey(scannedBillId),
+  ]);
+
+  return scanned.share_code;
+}
+
+export async function findSubmittedBill(elementId: string) {
+  const { resource } = await database.container(CONTAINER_ENTRIES)
+    .item(elementId, elementId)
+    .read<OnlineSubmittedBill>();
+
+  return resource ?? null;
+}
 
 export async function addScannedBill(element: ScannedBill, file: File): Promise<OnlineScannedBill> {
   const shareCode = createShareCode(16);

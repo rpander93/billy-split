@@ -17,32 +17,31 @@ export interface OnlineScannedBill extends ScannedBill {
   file_name: string;
 }
 
-export interface StateLineItem {
-  description: string;
-  amount: string;
-  total_price: string;
-}
-
-export interface ServerSubmitResponse {
-  share_code: string;
-}
-
-export interface OnlineBill {
-  id: string;
+export interface SubmittedBill {
   name: string;
-  image: string;
+  date: string;
+  currency: string;
+  service_fee: number | null;
+  payment_method: string;
+  line_items: Array<{
+    is_deleted: boolean;
+    amount: number;
+    description: string;
+    total_price: number;
+  }>;
+}
+
+export interface OnlineSubmittedBill extends Omit<SubmittedBill, "line_items"> {
+  id: string;
+  file_name: string;
   created_on: number;
   share_code: string;
-  currency?: string;
-  payment_method: string;
   number_of_payments: number;
   line_items: Array<{
     index: number;
     description: string;
     amount: number;
     unit_price: number;
-    total_price: number;
-    is_tip: boolean;
   }>;
   payment_items: Array<{
     creator: string;
@@ -52,4 +51,8 @@ export interface OnlineBill {
       amount: number;
     }>;
   }>;
+}
+
+export interface ServerSubmitResponse {
+  share_code: string;
 }

@@ -1,5 +1,5 @@
 import { ActionFunctionArgs, LoaderFunctionArgs, redirect } from "@remix-run/node";
-import { Form, useLoaderData } from "@remix-run/react";
+import { Form, useLoaderData, useNavigation } from "@remix-run/react";
 import { Fragment, useRef, useState } from "react";
 import { z } from "zod";
 
@@ -13,7 +13,8 @@ import { ReceiptBox } from "~/components/receipt-box";
 import { TextInput } from "~/components/text-input";
 import { Typography } from "~/components/typography";
 import { extractFirstUrl, formatCurrencyWithoutSymbol, tryParseFloat } from "~/functions";
-import { findScannedBill } from "~/services/bills";
+import { addSubmittedBill, findScannedBill } from "~/services/bills";
+import { SubmittedBill } from "~/types";
 
 export async function loader({ params }: LoaderFunctionArgs) {
   const element = await findScannedBill(params.entryId as string);
@@ -31,19 +32,20 @@ export async function loader({ params }: LoaderFunctionArgs) {
   };
 }
 
-export async function action({ request }: ActionFunctionArgs) {
+export async function action({ params, request }: ActionFunctionArgs) {
   const input_ = parseFormData(await request.formData());
   const result = submitShape.safeParse(input_);
   if (false === result.success) throw new Response("Invalid form data received", { status: 400 });
 
-  const input = result.data;
-  // TODO: save data
+  const input = result.data as SubmittedBill;
+  const shareCode = await addSubmittedBill(params.entryId as string, input);
 
-  return null;
+  return redirect(`/created/${shareCode}`);
 }
 
 export default function CreatePage() {
   const element = useLoaderData<typeof loader>();
+  const navigation = useNavigation();
 
   const serviceFeeRef = useRef<HTMLInputElement>(null);
   const [items, setItems] = useState<ItemState[]>(element.line_items);
@@ -257,7 +259,9 @@ export default function CreatePage() {
           <FormHelper>Tip: use a payment request from your bank</FormHelper>
         </Box>
 
-        <Button startDecorator="🧾" type="submit">Create bill</Button>
+        <Button loading={navigation.state === "submitting"} startDecorator="🧾" type="submit">
+          Create bill
+        </Button>
       </Box>
     </Form>
   );
@@ -273,7 +277,9 @@ const submitShape = z.object({
     .pipe(z.number().nullable()),
   payment_method: z.string(),
   line_items: z.array(z.object({
-    is_deleted: z.coerce.boolean(),
+    is_deleted: z.string()
+      .transform(v => v === "1")
+      .pipe(z.boolean()),
     description: z.string(),
     amount: z.string()
       .transform(v => tryParseFloat(v))

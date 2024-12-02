@@ -4,6 +4,7 @@ import { Box } from "./box";
 
 interface ButtonProps {
   children: React.ReactNode;
+  loading?: boolean;
   onClick?: React.MouseEventHandler<HTMLButtonElement>;
   position?: "start" | "middle" | "end" | "standalone";
   size?: "sm" | "md" | "none";
@@ -12,12 +13,34 @@ interface ButtonProps {
   variant?: "primary" | "secondary" | "ghost";
 }
 
-export function Button({ children, startDecorator, onClick, position = "standalone", size = "md", type = "button", variant = "primary" }: ButtonProps) {
+export function Button({ children, loading, startDecorator, onClick, position = "standalone", size = "md", type = "button", variant = "primary" }: ButtonProps) {  
+  const className = buttonStyle({
+    position,
+    size,
+    variant,
+    status: loading ? "loading" : undefined
+  });
+
   return (
-    <button className={buttonStyle({ position, size, variant })} onClick={onClick} type={type}>
-      {startDecorator}
-      <Typography color={variant === "primary" ? "text-inverse" : "text"} variant={size === "md" ? "body" : "small"}>{children}</Typography>
+    <button className={className} onClick={onClick} type={type}>
+      {loading ? "⏳" : startDecorator}
+      <Typography color={variant === "primary" ? "text-inverse" : "text"} variant={size === "md" ? "body" : "small"}>
+        {children}
+      </Typography>
     </button>
+  );
+}
+
+interface LinkButtonProps extends Pick<ButtonProps, "children" | "loading" | "startDecorator" | "size" | "variant"> {
+  href: string;
+}
+
+export function LinkButton({ children, href, loading, startDecorator, size = "md", variant = "primary" }: LinkButtonProps) {
+  return (
+    <a className={buttonStyle({ size, variant, status: loading ? "loading" : undefined })} href={href}>
+      {loading ? "⏳" : startDecorator}
+      <Typography color={variant === "primary" ? "text-inverse" : "text"} variant={size === "md" ? "body" : "small"}>{children}</Typography>
+    </a>
   );
 }
 
@@ -46,11 +69,12 @@ const buttonStyle = cva({
         },
       },
       secondary: {
+        backgroundColor: "white",
         borderColor: "gray.300",
         borderStyle: "solid",
         borderWidth: 1,
         "_hover": {
-          backgroundColor: "gray.50",
+          backgroundColor: "gray.100",
         },
       },
       ghost: {
@@ -92,6 +116,11 @@ const buttonStyle = cva({
       md: {
         paddingX: 4,
         paddingY: 2,
+      },
+    },
+    status: {
+      loading: {
+        opacity: 0.5,
       },
     },
   },
