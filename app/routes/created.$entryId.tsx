@@ -80,7 +80,7 @@ export default function CreatedPage() {
 
       <Box flexDirection="column" justifyContent="center">
         <Box justifyContent="center" backgroundColor="white" borderColor="gray.300" borderRadius="md" borderStyle="solid" borderWidth={1.5} padding={1}>
-          <canvas ref={canvasRef} style={{ height: 250, width: 250 }} />
+          <canvas ref={canvasRef} style={{ height: QRCODE_SIZE, width: QRCODE_SIZE }} />
         </Box>
 
         <Typography marginY={1} variant="small">
@@ -90,3 +90,5 @@ export default function CreatedPage() {
     </Box>
   );
 }
+
+const QRCODE_SIZE = 250;
