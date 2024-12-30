@@ -7,7 +7,7 @@ interface AvatarProps {
   zIndex?: number;
 }
 
-export function Avatar({ name, zIndex }: AvatarProps) {
+export function Avatar({ name, zIndex }: AvatarProps) {  
   return (
     <Box className={avatarCss} style={{ zIndex, backgroundColor: stringToColor(name) }}>
       <Typography color="white" fontSize="sm" fontWeight="bold">{name.split(" ").map(x => x.substring(0, 1)).join("")}</Typography>
@@ -17,31 +17,42 @@ export function Avatar({ name, zIndex }: AvatarProps) {
 
 const avatarCss = css({
   alignItems: "center",
-  borderColor: "white",
   borderRadius: "full",
   borderStyle: "solid",
-  borderWidth: 0.5,
   justifyContent: "center",
   height: 8,
   width: 8,
 });
 
-function stringToColor(string: string) {
+// Hash function to convert string to number
+function hashString(input: string) {
   let hash = 0;
-  let i;
 
-  /* eslint-disable no-bitwise */
-  for (i = 0; i < string.length; i += 1) {
-    hash = string.charCodeAt(i) + ((hash << 5) - hash);
+  for (let i = 0; i < input.length; i++) {
+      const char = input.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32-bit integer
   }
 
-  let color = "#";
+  return Math.abs(hash);
+}
 
-  for (i = 0; i < 3; i += 1) {
-    const value = (hash >> (i * 8)) & 0xff;
-    color += `00${value.toString(16)}`.slice(-2);
-  }
-  /* eslint-enable no-bitwise */
+// Convert a number to a darker pastel hex color
+function numberToPastelColor(input: number) {
+  // Use the number to generate 3 values between 0 and 255
+  const r = input % 256;
+  const g = (input >> 8) % 256;
+  const b = (input >> 16) % 256;
+  
+  // Convert to hex and ensure two digits
+  const toHex = (n: number) => n.toString(16).padStart(2, '0');
+  
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+}
 
-  return color;
+// Main function to convert string to pastel color
+function stringToColor(input: string) {
+  const hash = hashString(input);
+
+  return numberToPastelColor(hash);
 }

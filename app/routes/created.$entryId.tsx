@@ -73,7 +73,7 @@ export default function CreatedPage() {
             Copy link
           </Button>
         )}
-        <LinkButton href={shareUrl} startDecorator="🖱️" variant="secondary">
+        <LinkButton href={shareUrl} startDecorator="🖱️" variant="secondary" target="_self">
           Open
         </LinkButton>
       </Box>

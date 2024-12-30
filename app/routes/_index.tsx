@@ -12,6 +12,7 @@ import { UploadTextMarquee } from "~/components/upload-text-marquee";
 import { css } from '~/styled-system/css';
 import { extractor } from "~/services/extractor";
 import { addScannedBill } from "~/services/bills";
+import { Logo } from "~/components/logo";
 
 const MAX_FILE_SIZE_MB = process.env.MAX_FILE_SIZE_MB as unknown as number;
 
@@ -81,10 +82,7 @@ export default function LandingPage() {
 
   return (
     <Box flexDirection="column" justifyContent="center" rowGap={4}>
-      <Box alignItems="center" flexDirection="row" columnGap={2}>
-        <img alt="billy logo" className={css({ h: 6, w: 6 })} src="/billy-logo.webp" />
-        <Typography variant="logo">Billy Split</Typography>
-      </Box>
+      <Logo />
 
       <Box flexDirection="column">
         <Typography variant="h1">Want to split a bill?</Typography>

@@ -69,6 +69,29 @@ export async function findScannedBill(elementId: string): Promise<OnlineScannedB
   return resource ?? null;
 }
 
+interface PaymentProps {
+  index: number;
+  creator: string;
+  created_on: number;
+  line_items: Array<{ line_item_index: number; amount: number }>;
+}
+
+export async function addPaymentToBill(elementId: string, payment: Omit<PaymentProps, "index">) {
+  const entry = await findSubmittedBill(elementId);
+  if (entry === null) throw new Error(`Bill with id "${elementId}" does not exist`);
+  const paymentId = entry.number_of_payments + 1;
+
+  await database
+    .container(CONTAINER_ENTRIES)
+    .item(elementId, elementId)
+    .patch([
+      { op: "incr", path: "/number_of_payments", value: 1 },
+      { op: "add", path: "/payment_items/-", value: { ...payment, index: paymentId } },
+    ]);
+
+  return paymentId;
+}
+
 function createShareCode(length: number): string {
   let result = "";
   const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";

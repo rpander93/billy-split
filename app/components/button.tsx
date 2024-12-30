@@ -1,10 +1,14 @@
 import { cva } from "~/styled-system/css";
 import { Typography } from "./typography";
 import { Box } from "./box";
+import { BoxProps } from "~/styled-system/jsx";
+import { Children, cloneElement } from "react";
 
-interface ButtonProps {
+export interface ButtonProps {
   children: React.ReactNode;
+  flex?: number;
   loading?: boolean;
+  hover?: boolean;
   onClick?: React.MouseEventHandler<HTMLButtonElement>;
   position?: "start" | "middle" | "end" | "standalone";
   size?: "sm" | "md" | "none";
@@ -13,7 +17,7 @@ interface ButtonProps {
   variant?: "primary" | "secondary" | "ghost";
 }
 
-export function Button({ children, loading, startDecorator, onClick, position = "standalone", size = "md", type = "button", variant = "primary" }: ButtonProps) {  
+export function Button({ children, flex, loading, hover, startDecorator, onClick, position = "standalone", size = "md", type = "button", variant = "primary" }: ButtonProps) {  
   const className = buttonStyle({
     position,
     size,
@@ -22,30 +26,54 @@ export function Button({ children, loading, startDecorator, onClick, position = 
   });
 
   return (
-    <button className={className} onClick={onClick} type={type}>
+    <button className={className} data-hover={hover === true ? true : undefined} onClick={onClick} type={type} style={{ flex }}>
       {loading ? "⏳" : startDecorator}
-      <Typography color={variant === "primary" ? "text-inverse" : "text"} variant={size === "md" ? "body" : "small"}>
+      <Typography color="text" fontWeight="900" variant={size === "md" ? "body" : "small"}>
         {children}
       </Typography>
     </button>
   );
 }
 
-interface LinkButtonProps extends Pick<ButtonProps, "children" | "loading" | "startDecorator" | "size" | "variant"> {
+interface LinkButtonProps extends Pick<ButtonProps, "children" | "startDecorator" | "size" | "variant"> {
   href: string;
+  target?: React.ComponentProps<"a">["target"];
 }
 
-export function LinkButton({ children, href, loading, startDecorator, size = "md", variant = "primary" }: LinkButtonProps) {
+export function LinkButton({ children, href, startDecorator, size = "md", target, variant = "primary" }: LinkButtonProps) {
   return (
-    <a className={buttonStyle({ size, variant, status: loading ? "loading" : undefined })} href={href}>
-      {loading ? "⏳" : startDecorator}
-      <Typography color={variant === "primary" ? "text-inverse" : "text"} variant={size === "md" ? "body" : "small"}>{children}</Typography>
+    <a className={buttonStyle({ size, variant })} href={href} target={target} rel="noopener noreferer">
+      {startDecorator}
+      <Typography color="text" fontWeight="900" variant={size === "md" ? "body" : "small"}>{children}</Typography>
     </a>
   );
 }
 
-// alias
-export const ButtonGroup = Box;
+interface ButtonGroupProps extends Omit<BoxProps, "children"> {
+  children: React.ReactElement<ButtonProps>[];
+  size: ButtonProps["size"];
+}
+
+export function ButtonGroup({ children, size, ...restProps }: ButtonGroupProps) {
+  const length = Children.count(children);
+  const flex = 1 / length;
+
+  return (
+    <Box {...restProps}>
+      {Children.map(children, (element, index) => {
+        const position = length === 1
+          ? "standalone"
+          : index === 0
+            ? "start"
+            : index === length - 1
+              ? "end"
+              : "middle";
+
+        return cloneElement(element, { flex, position, size, variant: "secondary" });
+      })}
+    </Box>
+  );
+}
 
 const buttonStyle = cva({
   base: {
@@ -63,9 +91,9 @@ const buttonStyle = cva({
   variants: {
     variant: {
       primary: {
-        backgroundColor: "black",
+        backgroundColor: "gold",
         "_hover": {
-          backgroundColor: "gray.900",
+          backgroundColor: "#FBC901",
         },
       },
       secondary: {
@@ -92,15 +120,18 @@ const buttonStyle = cva({
         borderBottomRightRadius: 0,
       },
       middle: {
+        borderStartWidth: 0,
         borderRadius: 0,
       },
       end: {
+        borderStartWidth: 0,
         borderTopLeftRadius: 0,
         borderBottomLeftRadius: 0,
         borderTopRightRadius: "md",
         borderBottomRightRadius: "md",
       },
       standalone: {
+        borderColor: "transparent",
         borderRadius: "md",
         borderWidth: 1,
       },

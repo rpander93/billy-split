@@ -1,8 +1,11 @@
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "@remix-run/react";
 import type { LinksFunction } from "@remix-run/node";
-import styles from "./root.css?url"
+
 import { css } from "~/styled-system/css";
- 
+import { Modal } from "~/components/modal";
+
+import styles from "./root.css?url";
+
 export const links: LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {
@@ -31,6 +34,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body className={css({ display: "flex", flexDirection: "column", maxWidth: "576px", marginX: "auto", padding: 4 })}>
         {children}
+        <Modal.Root />
         <ScrollRestoration />
         <Scripts />
       </body>

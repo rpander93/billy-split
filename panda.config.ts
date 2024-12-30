@@ -33,9 +33,6 @@ export default defineConfig({
           background: {
             value: "#f4ebd9",
           },
-          primary: {
-            value: "#252525",
-          },
           text: {
             value: "#000",
           },

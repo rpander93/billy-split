@@ -44,6 +44,7 @@ export interface OnlineSubmittedBill extends Omit<SubmittedBill, "line_items"> {
     unit_price: number;
   }>;
   payment_items: Array<{
+    index: number;
     creator: string;
     created_on: number;
     line_items: Array<{

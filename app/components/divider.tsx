@@ -3,7 +3,7 @@ import { styled } from "~/styled-system/jsx";
 
 const lineItemSeparatorCss = cva({
   base: {
-    borderTopColor: "gray.300",
+    borderTopColor: "gray.200",
   },
 });
 

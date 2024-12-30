@@ -12,6 +12,7 @@ const receiptBoxCss = cva({
     flexDirection: "column",
     justifyContent: "center",
     marginX: -4,
+    rowGap: 3,
     paddingX: 4,
     paddingY: 8,
     mask: `

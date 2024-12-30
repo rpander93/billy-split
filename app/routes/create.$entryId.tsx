@@ -13,7 +13,9 @@ import { ReceiptBox } from "~/components/receipt-box";
 import { TextInput } from "~/components/text-input";
 import { Typography } from "~/components/typography";
 import { extractFirstUrl, formatCurrencyWithoutSymbol, tryParseFloat } from "~/functions";
+import { parseFormData } from "~/parse-form-data";
 import { addSubmittedBill, findScannedBill } from "~/services/bills";
+import { css } from "~/styled-system/css";
 import { SubmittedBill } from "~/types";
 
 export async function loader({ params }: LoaderFunctionArgs) {
@@ -204,9 +206,9 @@ export default function CreatePage() {
             })}
 
             <Box>
-              <Button onClick={handleClickCreate} startDecorator="🆕" size="sm" variant="ghost">
-                Add item
-              </Button>
+              <button className={addMeButtonCss} onClick={handleClickCreate}>
+                🆕 Add item
+              </button>
             </Box>
           </Box>
 
@@ -218,22 +220,23 @@ export default function CreatePage() {
             <Box alignItems="center" flexDirection="row" justifyContent="space-between">
               <Typography>Service</Typography>
               <Box alignItems="center" columnGap={2}>
-                <ButtonGroup>
-                  {AVAILABLE_TIPS.map((element, index) => {
-                    const position = index === 0 ? "start" : index === AVAILABLE_TIPS.length - 1 ? "end" : "middle";
-                    
-                    const handleClick = () => {
-                      const nextTipAmount = element * subTotalPrice;
-                      updateServiceFee(nextTipAmount);
-                    };
+                <Box alignItems="center" columnGap={1}>
+                  <Typography>(%)</Typography>
+                  <ButtonGroup size="sm">
+                    {AVAILABLE_TIPS.map(element => {  
+                      const handleClick = () => {
+                        const nextTipAmount = element * subTotalPrice;
+                        updateServiceFee(nextTipAmount);
+                      };
 
-                    return (
-                      <Button key={element} onClick={handleClick} position={position} size="sm" variant="secondary" >
-                        {formatPercentage(element)}
-                      </Button>
-                    );
-                  })}
-                </ButtonGroup>
+                      return (
+                        <Button key={element} onClick={handleClick}>
+                          {formatPercentage(element)}
+                        </Button>
+                      );
+                    })}
+                  </ButtonGroup>
+                </Box>
 
                 <TextInput
                   ref={serviceFeeRef}
@@ -276,7 +279,7 @@ const submitShape = z.object({
     .transform(v => v !== null ? tryParseFloat(v) : null)
     .pipe(z.number().nullable()),
   payment_method: z.string(),
-  line_items: z.array(z.object({
+  line_items: z.record(z.string(), z.object({
     is_deleted: z.string()
       .transform(v => v === "1")
       .pipe(z.boolean()),
@@ -287,7 +290,21 @@ const submitShape = z.object({
     total_price: z.string()
       .transform(v => tryParseFloat(v))
       .pipe(z.number()),
-  })),
+  }))
+    .transform(v => Object.values(v)),
+});
+
+const addMeButtonCss = css({
+  borderColor: "gray.300",
+  borderRadius: "full",
+  borderStyle: "dashed",
+  borderWidth: 1.5,
+  paddingX: 4,
+  height: 8,
+  _hover: {
+    backgroundColor: "gray.100",
+    cursor: "pointer",
+  },
 });
 
 interface ItemState {
@@ -317,36 +334,7 @@ function updateTotalPrice(current: number, input: string) {
 }
 
 function formatPercentage(input: number) {
-  return `${input * 100} %`;
+  return `${input * 100}`;
 }
 
-function parseFormData(input: FormData) {
-  const rawInput = [...input];
-  const lineItems: Array<Record<string, FormDataEntryValue>> = [];
-
-  for (const [key, value] of rawInput) {
-    if (key.startsWith("line_items[")) {
-      const matches = key.match(LINE_ITEM_REGEX);
-
-      if (matches !== null && matches.length === 3) {
-        const [, index_, prop] = matches;
-        const index = Number(index_);
-
-        lineItems[index] = lineItems[index] ?? {};
-        lineItems[index][prop] = value;
-      }
-    }
-  }
-
-  return {
-    ...Object.fromEntries(rawInput.filter(withoutLineItems)),
-    line_items: lineItems,
-  };
-}
-
-function withoutLineItems([key, _]: [string, unknown]) {
-  return !key.startsWith("line_items");
-}
-
-const LINE_ITEM_REGEX = /line_items\[(\d+)\]\[(\w+)\]/;
 const AVAILABLE_TIPS = [0.05, 0.1, 0.15, 0.2];
