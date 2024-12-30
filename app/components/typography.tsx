@@ -18,7 +18,7 @@ export const typography = cva({
       h2: {
         color: "text-header",
         fontFamily: "Lato",
-        fontWeigth: 700,
+        fontWeight: 700,
         fontSize: "1.5rem",
       },
       body: {
