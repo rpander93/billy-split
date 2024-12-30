@@ -2,8 +2,8 @@ import { OnlineScannedBill, OnlineSubmittedBill, ScannedBill, SubmittedBill } fr
 import { database } from "./database";
 import { upload } from "./files";
 
-const CONTAINER_SCANS = process.env.AZURE_COSMOS_CONTAINER_SCANS as string;
-const CONTAINER_ENTRIES = process.env.AZURE_COSMOS_CONTAINER_ENTRIES as string;
+const CONTAINER_SCANS = import.meta.env.VITE_AZURE_COSMOS_CONTAINER_SCANS as string;
+const CONTAINER_ENTRIES = import.meta.env.VITE_AZURE_COSMOS_CONTAINER_ENTRIES as string;
 
 export async function addSubmittedBill(scannedBillId: string, submitted: SubmittedBill) {
   const scanned = await findScannedBill(scannedBillId);

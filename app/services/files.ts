@@ -1,7 +1,7 @@
 import { BlobClient, BlobSASPermissions, BlobServiceClient } from "@azure/storage-blob";
 
-const CONNECTION_STRING = process.env.AZURE_BLOB_CONNECTION_STRING as string;
-const BLOB_CONTAINER = process.env.AZURE_BLOB_CONTAINER as string;
+const CONNECTION_STRING = import.meta.env.VITE_AZURE_BLOB_CONNECTION_STRING as string;
+const BLOB_CONTAINER = import.meta.env.VITE_AZURE_BLOB_CONTAINER as string;
 
 const blobServiceClient = BlobServiceClient.fromConnectionString(CONNECTION_STRING);
 const containerClient = blobServiceClient.getContainerClient(BLOB_CONTAINER);

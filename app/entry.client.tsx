@@ -10,7 +10,7 @@ import { startTransition, StrictMode } from "react";
 import { hydrateRoot } from "react-dom/client";
 
 Sentry.init({
-  dsn: process.env.SENTRY_DSN as string
+  dsn: import.meta.env.VITE_SENTRY_DSN as string
 });
 
 startTransition(() => {

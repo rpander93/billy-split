@@ -1,6 +1,6 @@
 import * as Sentry from "@sentry/remix";
 
 Sentry.init({
-  dsn: process.env.SENTRY_DSN,
+  dsn: import.meta.env.VITE_SENTRY_DSN,
   autoInstrumentRemix: true
 });
