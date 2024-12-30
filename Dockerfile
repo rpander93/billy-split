@@ -23,7 +23,7 @@ WORKDIR /www
 COPY . .
 COPY --from=dependencies /www/node_modules ./node_modules
 RUN pnpm run build
-RUN pnpm prune --prod
+RUN pnpm prune --prod --config.ignore-scripts=true
 
 ## Runtime
 FROM base AS runtime
