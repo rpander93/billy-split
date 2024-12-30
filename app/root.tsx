@@ -1,5 +1,6 @@
-import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "@remix-run/react";
-import type { LinksFunction } from "@remix-run/node";
+import { captureRemixErrorBoundaryError } from "@sentry/remix";
+import { Links, Meta, Outlet, Scripts, ScrollRestoration, useRouteError } from "@remix-run/react";
+import type { LinksFunction, MetaFunction } from "@remix-run/node";
 
 import { css } from "~/styled-system/css";
 import { Modal } from "~/components/modal";
@@ -23,6 +24,21 @@ export const links: LinksFunction = () => [
   }
 ];
 
+export const meta: MetaFunction = () => [
+  {
+    property: "description",
+    content: "Split bills and track who paid back what",
+  },
+  { property: "og:title", content: "Billy - Split with friends" },
+  {
+    property: "og:description",
+    content: "Split bills and track who paid back what",
+  },
+  { property: "og:url", content: "https://billy-split.it" },
+  { property: "og:image", content: "https://billy-split.it/favicon.ico" },
+  { title: "Billy - Scan bills and split with friends" },
+];
+
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
@@ -41,6 +57,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
     </html>
   );
 }
+
+export const ErrorBoundary = () => {
+  const error = useRouteError();
+  captureRemixErrorBoundaryError(error);
+  return <div>Something went wrong</div>;
+};
 
 export default function App() {
   return <Outlet />;
