@@ -16,7 +16,7 @@ export const links: LinksFunction = () => [
   },
   {
     rel: "stylesheet",
-    href: "https://fonts.googleapis.com/css2?family=Lato&family=Nanum+Pen+Script&family=PT+Serif&family=Inconsolata&display=swap",
+    href: "https://fonts.googleapis.com/css2?family=Inconsolata:wght@200..900&family=Lato:wght@400;700;900&family=Nanum+Pen+Script&family=PT+Serif:wght@400;700&display=swap",
   },
   {
     rel: "stylesheet",

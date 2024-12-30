@@ -23,7 +23,6 @@ export const typography = cva({
       },
       body: {
         fontSize: "1rem",
-        fontWeight: 400,
       },
       small: {
         color: "text-subtle",

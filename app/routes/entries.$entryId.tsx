@@ -102,7 +102,7 @@ export default function EntryPage() {
               <a href={`/entries/${bill.share_code}/open`} target="_blank" rel="noopener noreferrer">🔗</a>
             </Typography>
             <Typography>
-              {formatDate(parse(bill.date, "yyyy-mm-dd", new Date()), "d MMMM, yyyy")} | {currency(bill.currency)}
+              {formatDate(parse(bill.date, "yyyy-MM-dd", new Date()), "d MMMM, yyyy")} | {currency(bill.currency)}
             </Typography>
           </Box>
 
@@ -139,7 +139,7 @@ export default function EntryPage() {
               <TextInput name="name" required type="text" />
             </Box>
           
-            <Button loading={navigation.state === "submitting"} startDecorator="🪙" type="submit">
+            <Button loading={navigation.state === "submitting"} startDecorator="💸" type="submit">
               Pay back your share of {formatCurrency(selectionAmount, bill.currency)}
             </Button>
           </>
@@ -257,7 +257,8 @@ function PaymentList({ bill, totalAmount, selectionAmount, remainingAmount }: Pa
   return (
     <Fragment>
       <Box flexDirection="column" marginY={2} rowGap={4}>
-        {bill.payment_items.map((item, index) => {
+        {bill.payment_items.length > 0 ?
+          bill.payment_items.map((item, index) => {
           const totalAmount = sum(item.line_items.map(x => {
             const y = bill.line_items.find(z => z.index === x.line_item_index);
 
@@ -292,7 +293,9 @@ function PaymentList({ bill, totalAmount, selectionAmount, remainingAmount }: Pa
               <Divider />
             </Fragment>
           );
-        })}
+        }) : (
+          <Typography textAlign="center">No payments yet. Be the first!</Typography>
+        )}
       </Box>
 
       <Box flexDirection="column">
