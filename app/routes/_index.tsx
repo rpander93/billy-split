@@ -14,7 +14,7 @@ import { extractor } from "~/services/extractor";
 import { addScannedBill } from "~/services/bills";
 import { Logo } from "~/components/logo";
 
-const MAX_FILE_SIZE_MB = import.meta.env.VITE_MAX_FILE_SIZE_MB as unknown as number;
+const MAX_FILE_SIZE_MB = process.env.VITE_MAX_FILE_SIZE_MB as unknown as number;
 
 const MEMORY_UPLOAD_HANDLER = unstable_createMemoryUploadHandler({
   maxPartSize: MAX_FILE_SIZE_MB * 1024 * 1024,

@@ -1,7 +1,7 @@
 import { ScannedBill } from "~/types";
 
-const FORM_RECOGNIZER_URL = import.meta.env.VITE_AZURE_FORM_RECOGNIZER_URL as string;
-const FORM_RECOGNIZER_API_KEY = import.meta.env.VITE_AZURE_FORM_RECOGNIZER_API_KEY as string;
+const FORM_RECOGNIZER_URL = process.env.VITE_AZURE_FORM_RECOGNIZER_URL as string;
+const FORM_RECOGNIZER_API_KEY = process.env.VITE_AZURE_FORM_RECOGNIZER_API_KEY as string;
 
 export async function extractor(image: File) {
   const queueTicket = await queueParseImage(image);
