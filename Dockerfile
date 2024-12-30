@@ -34,6 +34,7 @@ COPY --from=build /www/build /www/build
 COPY --from=build /www/node_modules /www/node_modules
 COPY --from=build /www/public /www/public
 COPY --from=build /www/package.json /www/package.json
+COPY --from=build /www/instrumentation.server.mjs /www/instrumentation.server.mjs
 
 EXPOSE 3000
 ENV NODE_ENV=production
