@@ -163,7 +163,7 @@ interface LineItemListProps {
 function LineItemList({ bill, items, onAmountChange, onItemClick, onSplitChange, totalAmount, remainingAmount, selectionAmount }: LineItemListProps) {
   return (
     <Fragment>
-      <Box flexDirection="column" rowGap={2} marginY={2}>
+      <Box flexDirection="column" rowGap={2} marginY={4}>
         {items.map(element => (
           <Fragment key={element.index}>
             <Box flexDirection="column" rowGap={1}>
@@ -179,7 +179,7 @@ function LineItemList({ bill, items, onAmountChange, onItemClick, onSplitChange,
                 </Typography>
               </Box>
 
-              <Box alignItems="center" flexDirection="row" justifyContent="space-between">
+              <Box alignItems="center" flexDirection="row" justifyContent={element.payment_items.length > 0 ? "space-between" : "flex-end"}>
                 {element.payment_items.length > 0 && (
                   <Box alignItems="center" flexDirection="row" columnGap={1}>
                     {element.payment_items.map(payment => (
@@ -256,7 +256,7 @@ interface PaymentListProps {
 function PaymentList({ bill, totalAmount, selectionAmount, remainingAmount }: PaymentListProps) {
   return (
     <Fragment>
-      <Box flexDirection="column" marginY={2} rowGap={2}>
+      <Box flexDirection="column" marginY={2} rowGap={4}>
         {bill.payment_items.map((item, index) => {
           const totalAmount = sum(item.line_items.map(x => {
             const y = bill.line_items.find(z => z.index === x.line_item_index);
@@ -276,7 +276,7 @@ function PaymentList({ bill, totalAmount, selectionAmount, remainingAmount }: Pa
                   </Typography>
                 </Box>
 
-                <Box flexDirection="column" marginStart={4} marginY={2}>
+                <Box flexDirection="column" marginStart={4} marginTop={2}>
                   {item.line_items.map(element => {
                     const y = bill.line_items.find(z => z.index === element.line_item_index);
 

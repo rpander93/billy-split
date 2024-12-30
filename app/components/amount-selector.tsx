@@ -46,10 +46,10 @@ const quantityButtonCss = css.raw({
   backgroundColor: "white",
   borderColor: "gray.300",
   borderStyle: "solid",
-  borderWidth: 1,
+  borderWidth: 1.5,
   position: "relative",
-  height: 7.5,
-  width: 10,
+  height: 7,
+  width: 12,
   zIndex: 1,
   _hover: {
     "&:not(:disabled)": {
@@ -61,11 +61,15 @@ const quantityButtonCss = css.raw({
 const minusButtonCss = css.raw({
   borderTopLeftRadius: "md",
   borderBottomLeftRadius: "md",
-  marginRight: -2,
+  marginRight: -3,
+  paddingInline: 4,
+  textAlign: "start",
 });
 
 const plusButtonCss = css.raw({
   borderTopRightRadius: "md",
   borderBottomRightRadius: "md",
-  marginLeft: -2,
+  marginLeft: -3,
+  paddingInline: 4,
+  textAlign: "end",
 });
