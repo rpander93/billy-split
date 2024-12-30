@@ -7,7 +7,7 @@ RUN npm install -g pnpm
 FROM base as dependencies
 WORKDIR /www
 
-COPY package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml panda.config.ts ./
 RUN pnpm install
 
 ## Build stage
