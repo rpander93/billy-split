@@ -256,7 +256,7 @@ interface PaymentListProps {
 function PaymentList({ bill, totalAmount, selectionAmount, remainingAmount }: PaymentListProps) {
   return (
     <Fragment>
-      <Box flexDirection="column" marginY={2}>
+      <Box flexDirection="column" marginY={2} rowGap={2}>
         {bill.payment_items.map((item, index) => {
           const totalAmount = sum(item.line_items.map(x => {
             const y = bill.line_items.find(z => z.index === x.line_item_index);

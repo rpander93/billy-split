@@ -46,10 +46,10 @@ const quantityButtonCss = css.raw({
   backgroundColor: "white",
   borderColor: "gray.300",
   borderStyle: "solid",
-  borderWidth: 0.5,
+  borderWidth: 1,
   position: "relative",
-  height: 6,
-  width: 8,
+  height: 7.5,
+  width: 10,
   zIndex: 1,
   _hover: {
     "&:not(:disabled)": {
