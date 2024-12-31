@@ -139,7 +139,6 @@ export default function CreatePage() {
               };
 
               const handleChangeDescription = (event: React.ChangeEvent<HTMLInputElement>) => {
-                event.target.size = Math.max(event.target.value.length + 4, 4);
                 setItems(current => current.with(index, { ...item, description: event.target.value }));
               };
 
@@ -160,8 +159,8 @@ export default function CreatePage() {
                       onBlur={handleChangeAmount}
                       placeholder="-x"
                       required
-                      size={2}
                       space="small"
+                      style={{ width: `${32 + 2 * 6}px` }}
                       textAlign="center"
                       type="number"
                     />
@@ -173,7 +172,7 @@ export default function CreatePage() {
                       placeholder="Item"
                       required
                       space="small"
-                      size={Math.min((item.description?.length ?? 0) + 4, 20)}
+                      style={{ width: `${42 + Math.min((item.description?.length ?? 0) + 4, 20) * 6}px` }}
                     />
                     <TextInput
                       defaultValue={item.total_price !== undefined ? formatCurrencyWithoutSymbol(item.total_price) : item.total_price}
@@ -184,7 +183,7 @@ export default function CreatePage() {
                       inputMode="decimal"
                       placeholder={formatCurrencyWithoutSymbol(0)}
                       required
-                      size={8}
+                      style={{ width: `${32 + 6 * 6}px` }}
                       space="small"
                       textAlign="right"
                     />

@@ -74,7 +74,7 @@ export default function EntryPage() {
 
     const selection = items.filter(x => x.mode !== "undecided").map(x => ({
       index: x.index,
-      amount: x.amount,
+      amount: x.current_amount,
     }));
 
     submit(
