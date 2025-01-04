@@ -99,9 +99,9 @@ export default function LandingPage() {
               </Box>
             </motion.div>
           ) : (
-            <motion.div key="file-input" exit={{ opacity: 0 }} transition={{ duration: 1 / 10 }}>
-              <Box flexDirection="column" marginY={2} rowGap={0.25}>
-                <Button onClick={handleClick}>Pick image</Button>
+            <motion.div key="file-input" className={mainDivCss} exit={{ opacity: 0 }} transition={{ duration: 1 / 10 }}>
+              <Box flexDirection="column" rowGap={0.25}>
+                <Button onClick={handleClick} startDecorator="📷">Pick image</Button>
                 <input ref={inputRef} className={css({ display: "none" })} name="file" onChange={handleFileSelected} type="file" accept="image/*" />
                 <button ref={buttonRef} className={css({ display: "none" })} type="submit" />
                 <Typography variant="small">Take a picture or select it from your photo library</Typography>
@@ -118,6 +118,8 @@ export default function LandingPage() {
                   </ol>
                 </Typography>
               </Box>
+
+              <img alt="example screenshot of scanned bill" src="/screenshot.webp" />
             </motion.div>
           )}
         </AnimatePresence>
@@ -125,3 +127,9 @@ export default function LandingPage() {
     </Box>
   );
 }
+
+const mainDivCss = css({
+  display: "flex",
+  flexDirection: "column",
+  rowGap: 2,
+});
