@@ -86,6 +86,7 @@ export default function EntryPage() {
   const totalAmount = useMemo(() => calculate.total(items), [items]);
   const selectionAmount = useMemo(() => calculate.current(bill, items), [bill, items]);
   const remainingAmount = useMemo(() => calculate.remaining(bill, totalAmount, selectionAmount), [bill, totalAmount, selectionAmount]);
+  const date = bill.date ? parse(bill.date, "yyyy-MM-dd", new Date()) : new Date(bill.created_on * 1000);
 
   return (
     <Form autoComplete="off" method="POST" onSubmit={handleSubmit}>
@@ -99,10 +100,10 @@ export default function EntryPage() {
           <Box alignSelf="center" flexDirection="column" rowGap={1}>
             <Typography textAlign="center">
               {bill.name}
-              <a href={`/entries/${bill.share_code}/open`} target="_blank" rel="noopener noreferrer">🔗</a>
+              <a href={`/entries/${bill.share_code}/open`} target="_blank" rel="noopener noreferrer" style={{ marginLeft: 4 }}>🔗</a>
             </Typography>
             <Typography>
-              {formatDate(parse(bill.date, "yyyy-MM-dd", new Date()), "d MMMM, yyyy")} | {currency(bill.currency)}
+              {formatDate(date, "d MMMM, yyyy")} | {currency(bill.currency)}
             </Typography>
           </Box>
 
