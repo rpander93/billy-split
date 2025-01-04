@@ -9,18 +9,30 @@ export async function addSubmittedBill(scannedBillId: string, submitted: Submitt
   const scanned = await findScannedBill(scannedBillId);
   if (scanned === null) throw new Error(`Cannot find scanned item with id "${scannedBillId}"`);
 
+  const submittedLineItems = submitted.line_items
+    .filter(x => x.is_deleted === false)
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    .map(({ is_deleted, ...item }, index) => ({
+      ...item,
+      index,
+      unit_price: item.total_price / item.amount,
+    }));
+
+  if (submitted.service_fee !== null && submitted.service_fee > 0) {
+    submittedLineItems.push({
+      index: submittedLineItems.length,
+      unit_price: submitted.service_fee,
+      amount: 1,
+      total_price: submitted.service_fee,
+      description: "Service fee",
+    });
+  }
+
   await Promise.all([
     database.container(CONTAINER_ENTRIES).items.upsert<OnlineSubmittedBill>({
       ...scanned,
       ...submitted,
-      line_items: submitted.line_items
-        .filter(x => x.is_deleted === false)
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        .map(({ is_deleted, ...item }, index) => ({
-          ...item,
-          index,
-          unit_price: item.total_price / item.amount,
-        })),
+      line_items: submittedLineItems,
       number_of_payments: 0,
       payment_items: [],
     }),
