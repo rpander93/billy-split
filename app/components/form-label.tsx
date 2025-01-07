@@ -1,4 +1,5 @@
-import { styled } from "~/styled-system/jsx";
-import { typography } from "./typography";
+import { css } from "~/styled-system/css";
 
-export const FormLabel = styled("label", typography);
+export function FormLabel(props: React.ComponentProps<"label">) {
+  return <label {...props} className={css({ fontSize: "1rem", fontWeight: "600" })} />;
+}

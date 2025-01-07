@@ -5,7 +5,7 @@ export function ProgressIndicator() {
     <div className={css({ bg: "white", rounded: "lg", overflow: "hidden", width: "full" })}>
       <div
         className={css({
-          bg: "black",
+          bg: "gold",
           width: '33.3%',
           height: 4,
           rounded: "lg",

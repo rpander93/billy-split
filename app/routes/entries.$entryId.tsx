@@ -164,7 +164,7 @@ interface LineItemListProps {
 function LineItemList({ bill, items, onAmountChange, onItemClick, onSplitChange, totalAmount, remainingAmount, selectionAmount }: LineItemListProps) {
   return (
     <Fragment>
-      <Box flexDirection="column" rowGap={2} marginY={4}>
+      <Box flexDirection="column" rowGap={3} marginY={4}>
         {items.map(element => (
           <Fragment key={element.index}>
             <Box flexDirection="column" rowGap={1}>
@@ -183,8 +183,10 @@ function LineItemList({ bill, items, onAmountChange, onItemClick, onSplitChange,
               <Box alignItems="center" flexDirection="row" justifyContent={element.payment_items.length > 0 ? "space-between" : "flex-end"}>
                 {element.payment_items.length > 0 && (
                   <Box alignItems="center" flexDirection="row" columnGap={1}>
-                    {element.payment_items.map(payment => (
-                      <Avatar key={payment.creator + payment.amount} name={payment.creator} />
+                    {element.payment_items.map((payment, index) => (
+                      <Box key={payment.creator + payment.amount} marginInlineStart={index > 0 ? -5 : undefined}>
+                        <Avatar name={payment.creator} />
+                      </Box>
                     ))}
                   </Box>
                 )}
@@ -257,7 +259,7 @@ interface PaymentListProps {
 function PaymentList({ bill, totalAmount, selectionAmount, remainingAmount }: PaymentListProps) {
   return (
     <Fragment>
-      <Box flexDirection="column" marginY={2} rowGap={4}>
+      <Box flexDirection="column" marginY={2} rowGap={3}>
         {bill.payment_items.length > 0 ?
           bill.payment_items.map((item, index) => {
           const totalAmount = sum(item.line_items.map(x => {

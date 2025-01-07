@@ -52,6 +52,7 @@ export default function CreatePage() {
   const serviceFeeRef = useRef<HTMLInputElement>(null);
   const [items, setItems] = useState<ItemState[]>(element.line_items);
   const [serviceFee, setServiceFee] = useState(element.service_fee);
+  const [usingPaymentMethod, setUsingPaymentMethod] = useState<"payment_request" | "other">();
 
   const handleClickCreate = () => {
     setItems(current => ([
@@ -143,9 +144,13 @@ export default function CreatePage() {
               };
 
               const handleClickDelete = () => {
-                const isDeleted = !item.is_deleted;
-                document.querySelector(`input[name="line_items[${index}][is_deleted]"]`)!.value = isDeleted;
-                setItems(current => current.with(index, { ...item, is_deleted: isDeleted }));
+                if (item.amount === undefined || item.amount === 0) {
+                  setItems(current => current.filter((_x, _xindex) => _xindex !== index));
+                } else {
+                  const isDeleted = !item.is_deleted;
+                  document.querySelector(`input[name="line_items[${index}][is_deleted]"]`)!.value = isDeleted;
+                  setItems(current => current.with(index, { ...item, is_deleted: isDeleted }));
+                }
               };
 
               return (
@@ -256,10 +261,26 @@ export default function CreatePage() {
         </ReceiptBox>
 
         <Box flexDirection="column" rowGap={1}>
-          <FormLabel htmlFor="payment_method">How do you want to get paid?</FormLabel>
-          <TextInput name="payment_method" onPaste={handlePaste} required type="text" />
-          <FormHelper>Tip: use a payment request from your bank</FormHelper>
+          <FormLabel>How do you want to get paid?</FormLabel>
+
+          <Box flexDirection="row" columnGap={2}>
+            <input type="radio" name="payment_method_selector" id="paymentMethodSelector1" value="payment_request" onClick={() => setUsingPaymentMethod("payment_request")} />
+            <label htmlFor="paymentMethodSelector1">Payment request</label>
+
+            <Box width={2} />
+
+            <input type="radio" name="payment_method_selector" id="paymentMethodSelector2" value="other" onClick={() => setUsingPaymentMethod("other")} />
+            <label htmlFor="paymentMethodSelector2">Other</label>
+          </Box>
         </Box>
+
+        {usingPaymentMethod !== undefined && (
+          <Box flexDirection="column" rowGap={1}>
+            <FormLabel htmlFor="payment_method">{usingPaymentMethod === "payment_request" ? "Link to payment request" : "Indicate how you want to be paid back"}</FormLabel>
+            <TextInput name="payment_method" onPaste={handlePaste} required type="text" />
+            <FormHelper>A link will be extracted from any text you copy paste</FormHelper>
+          </Box>
+        )}
 
         <Button loading={navigation.state === "submitting"} startDecorator="🧾" type="submit">
           Create bill

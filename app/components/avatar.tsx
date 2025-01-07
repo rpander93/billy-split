@@ -17,8 +17,10 @@ export function Avatar({ name, zIndex }: AvatarProps) {
 
 const avatarCss = css({
   alignItems: "center",
+  borderColor: "white",
   borderRadius: "full",
   borderStyle: "solid",
+  borderWidth: "0.1em",
   justifyContent: "center",
   height: 8,
   width: 8,
