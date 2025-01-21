@@ -116,6 +116,7 @@ export default function CreatePage() {
                 name="date"
                 type="date"
                 textAlign="center"
+                required
               />
               <CurrencyInput
                 defaultValue={element.currency}
@@ -264,12 +265,12 @@ export default function CreatePage() {
           <FormLabel>How do you want to get paid?</FormLabel>
 
           <Box flexDirection="row" columnGap={2}>
-            <input type="radio" name="payment_method_selector" id="paymentMethodSelector1" value="payment_request" onClick={() => setUsingPaymentMethod("payment_request")} />
+            <input type="radio" name="payment_method_selector" id="paymentMethodSelector1" value="payment_request" onClick={() => setUsingPaymentMethod("payment_request")} required />
             <label htmlFor="paymentMethodSelector1">Payment request</label>
 
             <Box width={2} />
 
-            <input type="radio" name="payment_method_selector" id="paymentMethodSelector2" value="other" onClick={() => setUsingPaymentMethod("other")} />
+            <input type="radio" name="payment_method_selector" id="paymentMethodSelector2" value="other" onClick={() => setUsingPaymentMethod("other")} required />
             <label htmlFor="paymentMethodSelector2">Other</label>
           </Box>
         </Box>

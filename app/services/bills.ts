@@ -61,7 +61,7 @@ export async function addScannedBill(element: ScannedBill, file: File): Promise<
     id: shareCode,
     file_name: shareCode + fileExtension,
     created_on: Date.now() / 1000,
-    date: element.date !== null ? element.date : formatYMD(),
+    date: element.date !== null ? ensureYMD(element.date) : formatYMD(),
     share_code: shareCode,
   };
 
@@ -117,11 +117,20 @@ function createShareCode(length: number): string {
   return result;
 }
 
+function ensureYMD(input: string) {
+  if (input.length === 10) { // "XXXX-XX-XX"
+    return input;
+  }
+
+  const splitted = input.split("-");
+  return `${splitted[0]}-${splitted[1].padStart(2, "0")}-${splitted[2].padStart(2, "0")}`;
+}
+
 function formatYMD() {
   const currentDate = new Date();
   const localYear = currentDate.getFullYear();
   const localMonth = currentDate.getMonth() + 1; // Note: months are 0-indexed
   const localDay = currentDate.getDate();
 
-  return `${localYear}-${localMonth}-${localDay}`;
+  return `${localYear}-${localMonth.toString().padStart(2, "0")}-${localDay.toString().padStart(2, "0")}`;
 }
