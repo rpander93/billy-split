@@ -4,7 +4,7 @@ FROM node:22-alpine AS base
 RUN npm install -g pnpm
 
 ## Dependencies
-FROM base as dependencies
+FROM base AS dependencies
 WORKDIR /www
 
 COPY package.json pnpm-lock.yaml panda.config.ts ./
