@@ -39,7 +39,6 @@ jobs:
         env:
           DEPLOY_SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
           DEPLOY_SSH_KEYSCAN: ${{ secrets.DEPLOY_SSH_KEYSCAN }}
-          DEPLOY_SSH_SERVER: ${{ secrets.DEPLOY_SSH_SERVER }}
           REGISTRY_URL: ${{ secrets.REGISTRY_URL }}
           REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
           REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
