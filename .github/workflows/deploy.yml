@@ -16,33 +16,33 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    permissions: 
-      id-token: write #This is required for requesting the OIDC JWT Token
-      contents: read #Required when GH token is used to authenticate with private repo
 
     steps:
       - name: Checkout to the branch
         uses: actions/checkout@v2
 
-      - name: Azure Login
-        uses: azure/login@v1
-        with:
-          client-id: ${{ secrets.BILLYCONTAINERAPP_AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.BILLYCONTAINERAPP_AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.BILLYCONTAINERAPP_AZURE_SUBSCRIPTION_ID }}
+      - name: Setup SSH
+        env:
+          DEPLOY_SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+          DEPLOY_SSH_KEYSCAN: ${{ secrets.DEPLOY_SSH_KEYSCAN }}
+          DEPLOY_SSH_SERVER: ${{ secrets.DEPLOY_SSH_SERVER }}
+        run: |
+          mkdir -p ~/.ssh
+          eval "$(ssh-agent -s)"
+          echo "$DEPLOY_SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          echo "$DEPLOY_SSH_KEYSCAN" > ~/.ssh/known_hosts
 
-      - name: Build and push container image to registry
-        uses: azure/container-apps-deploy-action@v2
-        with:
-          appSourcePath: ${{ github.workspace }}
-          _dockerfilePathKey_: _dockerfilePath_
-          registryUrl: panderdev.azurecr.io
-          registryUsername: ${{ secrets.BILLYCONTAINERAPP_REGISTRY_USERNAME }}
-          registryPassword: ${{ secrets.BILLYCONTAINERAPP_REGISTRY_PASSWORD }}
-          containerAppName: billy-container-app
-          resourceGroup: billy-resources
-          imageToBuild: panderdev.azurecr.io/billy-container-app:${{ github.sha }}
-          _buildArgumentsKey_: |
-            _buildArgumentsValues_
-
-
+      - name: Build container and deploy
+        run: |
+          docker build --platform=linux/arm64 --tag $REGISTRY_URL/billy-split:$REGISTRY_IMAGE_TAG --tag $REGISTRY_URL/billy-split:latest .
+          docker login $REGISTRY_URL --username $REGISTRY_USERNAME --password $REGISTRY_PASSWORD
+          docker push $REGISTRY_URL/billy-split:$REGISTRY_IMAGE_TAG
+          ssh -i ~/.ssh/deploy_key $DEPLOY_SSH_SERVER -l $DEPLOY_SSH_USERNAME "cd billy-split; docker rm -f billy-split && docker compose pull && docker compose up -d"
+        env:
+          REGISTRY_URL: ${{ secrets.REGISTRY_URL }}
+          REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+          REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+          REGISTRY_IMAGE_TAG: ${{ github.sha }}
+          DEPLOY_SSH_SERVER: ${{ secrets.DEPLOY_SSH_SERVER }}
+          DEPLOY_SSH_USERNAME: ${{ secrets.DEPLOY_SSH_USERNAME }}
