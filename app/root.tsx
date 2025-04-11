@@ -34,8 +34,8 @@ export const meta: MetaFunction = () => [
     property: "og:description",
     content: "Split bills and track who paid back what",
   },
-  { property: "og:url", content: "https://billy-split.it" },
-  { property: "og:image", content: "https://billy-split.it/favicon.ico" },
+  { property: "og:url", content: import.meta.env.VITE_HTTP_HOST as string },
+  { property: "og:image", content: `${import.meta.env.VITE_HTTP_HOST as string}/favicon.ico` },
   { title: "Billy - Scan bills and split with friends" },
 ];
 

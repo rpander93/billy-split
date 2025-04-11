@@ -24,7 +24,7 @@ export default function CreatedPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isShareAvailable, setIsShareAvailable] = useState(false);
   const [isCopiedToClipboard, setIsCopiedToClipboard] = useState(false);
-  const shareUrl = `https://billy-split.it/entries/${shareCode}`;
+  const shareUrl = `${import.meta.env.VITE_HTTP_HOST}/entries/${shareCode}`;
 
   useEffect(() => {
     setIsShareAvailable(navigator.share !== undefined);
