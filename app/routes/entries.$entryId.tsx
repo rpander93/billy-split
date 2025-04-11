@@ -273,9 +273,9 @@ function PaymentList({ bill, totalAmount, selectionAmount, remainingAmount }: Pa
               <Box flexDirection="column">
                 <Box alignItems="center" flexDirection="row" columnGap={4}>
                   <Avatar name={item.creator} />
-                  <Typography fontWeight="bolder">{item.creator}</Typography>
+                  <Typography>{item.creator}</Typography>
 
-                  <Typography fontWeight="bold" marginInlineStart="auto">
+                  <Typography marginInlineStart="auto">
                     {formatCurrency(totalAmount, bill.currency)}
                   </Typography>
                 </Box>
@@ -286,8 +286,8 @@ function PaymentList({ bill, totalAmount, selectionAmount, remainingAmount }: Pa
 
                     return (
                       <Box key={element.line_item_index}>
-                        <Typography color="gray.600" flex={1 / 10}>{formatDecimal(element.amount)}</Typography>
-                        <Typography flex={9 / 10}>{y!.description}</Typography>
+                        <Typography color="gray.600" flex={1 / 10} fontSize="sm">{formatDecimal(element.amount)}</Typography>
+                        <Typography flex={9 / 10} fontSize="sm">{y!.description}</Typography>
                       </Box>
                     );
                   })}
