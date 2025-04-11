@@ -1,10 +1,11 @@
 ## Install pnpm
 FROM node:22-alpine AS base
 
-RUN npm install -g pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
 
 ## Dependencies
 FROM base AS dependencies
+
 WORKDIR /www
 
 COPY package.json pnpm-lock.yaml panda.config.ts ./
@@ -22,8 +23,7 @@ ENV SENTRY_RELEASE_NAME=$SENTRY_RELEASE_NAME
 WORKDIR /www
 COPY . .
 COPY --from=dependencies /www/node_modules ./node_modules
-RUN pnpm run build
-RUN pnpm prune --prod --config.ignore-scripts=true
+RUN pnpm run build && pnpm store prune && pnpm prune --prod --config.ignore-scripts=true
 
 ## Runtime
 FROM base AS runtime
