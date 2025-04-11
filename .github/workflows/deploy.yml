@@ -1,45 +1,45 @@
-name: Trigger auto deployment for billy-container-app
+name: billy-split
 
-# When this action will be executed
 on:
-  # Automatically trigger it when detected changes in repo
   push:
-    branches: 
-      [ main ]
-    paths:
-    - '**'
-    - '.github/workflows/deploy.yml'
-
-  # Allow manual trigger 
-  workflow_dispatch:      
+    branches: [ main ]
+  pull_request:
+    branches: [ main ] 
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout to the branch
         uses: actions/checkout@v2
 
-      - name: Setup SSH
-        env:
-          DEPLOY_SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
-          DEPLOY_SSH_KEYSCAN: ${{ secrets.DEPLOY_SSH_KEYSCAN }}
-          DEPLOY_SSH_SERVER: ${{ secrets.DEPLOY_SSH_SERVER }}
+      - name: Build container
         run: |
+          docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+          docker build --platform=linux/arm64 --tag $REGISTRY_URL/billy-split:$REGISTRY_IMAGE_TAG --tag $REGISTRY_URL/billy-split:latest .
+        env:
+          REGISTRY_URL: ${{ secrets.REGISTRY_URL }}
+          REGISTRY_IMAGE_TAG: ${{ github.sha }}
+
+      - name: Deploy container to server
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          # Setup SSH
           mkdir -p ~/.ssh
           eval "$(ssh-agent -s)"
           echo "$DEPLOY_SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
           echo "$DEPLOY_SSH_KEYSCAN" > ~/.ssh/known_hosts
 
-      - name: Build container and deploy
-        run: |
-          docker build --platform=linux/arm64 --tag $REGISTRY_URL/billy-split:$REGISTRY_IMAGE_TAG --tag $REGISTRY_URL/billy-split:latest .
+          # Deploy container
           docker login $REGISTRY_URL --username $REGISTRY_USERNAME --password $REGISTRY_PASSWORD
           docker push $REGISTRY_URL/billy-split:$REGISTRY_IMAGE_TAG
           ssh -i ~/.ssh/deploy_key "$DEPLOY_SSH_SERVER" -l "$DEPLOY_SSH_USERNAME" "cd billy-split; docker rm -f billy-split && docker compose pull && docker compose up -d"
         env:
+          DEPLOY_SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+          DEPLOY_SSH_KEYSCAN: ${{ secrets.DEPLOY_SSH_KEYSCAN }}
+          DEPLOY_SSH_SERVER: ${{ secrets.DEPLOY_SSH_SERVER }}
           REGISTRY_URL: ${{ secrets.REGISTRY_URL }}
           REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
           REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
