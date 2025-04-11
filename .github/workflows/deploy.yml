@@ -38,7 +38,7 @@ jobs:
           docker build --platform=linux/arm64 --tag $REGISTRY_URL/billy-split:$REGISTRY_IMAGE_TAG --tag $REGISTRY_URL/billy-split:latest .
           docker login $REGISTRY_URL --username $REGISTRY_USERNAME --password $REGISTRY_PASSWORD
           docker push $REGISTRY_URL/billy-split:$REGISTRY_IMAGE_TAG
-          ssh -i ~/.ssh/deploy_key $DEPLOY_SSH_SERVER -l $DEPLOY_SSH_USERNAME "cd billy-split; docker rm -f billy-split && docker compose pull && docker compose up -d"
+          ssh -i ~/.ssh/deploy_key "$DEPLOY_SSH_SERVER" -l "$DEPLOY_SSH_USERNAME" "cd billy-split; docker rm -f billy-split && docker compose pull && docker compose up -d"
         env:
           REGISTRY_URL: ${{ secrets.REGISTRY_URL }}
           REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
