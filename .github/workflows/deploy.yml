@@ -33,9 +33,10 @@ jobs:
           echo "$DEPLOY_SSH_KEYSCAN" > ~/.ssh/known_hosts
 
           # Deploy container
-          docker login $REGISTRY_URL --username $REGISTRY_USERNAME --password $REGISTRY_PASSWORD
+          echo "$REGISTRY_PASSWORD" | docker login $REGISTRY_URL --username $REGISTRY_USERNAME --password-stdin
           docker push $REGISTRY_URL/billy-split:$REGISTRY_IMAGE_TAG
           ssh -i ~/.ssh/deploy_key "$DEPLOY_SSH_SERVER" -l "$DEPLOY_SSH_USERNAME" "cd billy-split; docker rm -f billy-split && docker compose pull && docker compose up -d"
+          docker logout
         env:
           DEPLOY_SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
           DEPLOY_SSH_KEYSCAN: ${{ secrets.DEPLOY_SSH_KEYSCAN }}
