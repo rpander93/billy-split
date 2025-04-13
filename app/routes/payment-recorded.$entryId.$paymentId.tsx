@@ -41,10 +41,10 @@ export default function PaymentRecordedPage() {
 
       {paymentMethod.url ? (
         <Box alignItems="center" flexDirection="column" rowGap={1}>
-          <Typography>Did the payment request not open?</Typography>
+          <Typography>Please complete the payment by clicking below button</Typography>
           
           <LinkButton href={paymentMethod.value} startDecorator="🔗" target="_blank" variant="secondary">
-            Click here to open it in a new tab
+            Click here
           </LinkButton>
         </Box>
       ) : (
