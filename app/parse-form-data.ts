@@ -36,37 +36,37 @@ export function parseFormData(formData: FormData): Record<string, FormDataValue>
 
       // Initialize current key if needed
       if (!current[currentKey]) {
-        current[currentKey] = stripped === '' ? [] : {};
+        current[currentKey] = stripped === "" ? [] : {};
       }
 
       if (isLast) {
-        if (stripped === '') {
+        if (stripped === "") {
           (current[currentKey] as FormDataArray).push(value);
         } else {
           (current[currentKey] as Record<string, FormDataValue>)[stripped] = value;
         }
       } else {
         const currentValue = current[currentKey];
-        
-        if (stripped === '') {
+
+        if (stripped === "") {
           // Handle empty brackets
           const nextPart = parts[index + 1]?.slice(1, -1);
           if (!lastArrayIndex[currentKey]) {
             lastArrayIndex[currentKey] = 0;
           }
-          
+
           if (!Array.isArray(currentValue)) {
             const newArray: FormDataArray = [];
             current[currentKey] = newArray;
-            newArray[lastArrayIndex[currentKey]] = nextPart === '' ? [] : {};
+            newArray[lastArrayIndex[currentKey]] = nextPart === "" ? [] : {};
             current = newArray[lastArrayIndex[currentKey]] as Record<string, FormDataValue>;
           } else {
             if (!currentValue[lastArrayIndex[currentKey]]) {
-              currentValue[lastArrayIndex[currentKey]] = nextPart === '' ? [] : {};
+              currentValue[lastArrayIndex[currentKey]] = nextPart === "" ? [] : {};
             }
             current = currentValue[lastArrayIndex[currentKey]] as Record<string, FormDataValue>;
           }
-          
+
           currentKey = String(lastArrayIndex[currentKey]);
           lastArrayIndex[currentKey]++;
         } else {

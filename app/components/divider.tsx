@@ -3,8 +3,8 @@ import { styled } from "~/styled-system/jsx";
 
 const lineItemSeparatorCss = cva({
   base: {
-    borderTopColor: "gray.200",
-  },
+    borderTopColor: "gray.200"
+  }
 });
 
 export const Divider = styled("hr", lineItemSeparatorCss);

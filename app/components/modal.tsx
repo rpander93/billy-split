@@ -1,10 +1,10 @@
+import { type ElementRef, type MouseEventHandler, useEffect, useRef } from "react";
 import { createCallable } from "react-call";
-import { ElementRef, MouseEventHandler, useEffect, useRef } from "react";
 
-import { Typography } from "./typography";
-import { Button, ButtonProps } from "./button";
 import { css } from "~/styled-system/css";
 import { Box } from "./box";
+import { Button, type ButtonProps } from "./button";
+import { Typography } from "./typography";
 
 interface ModalProps {
   buttons: Array<Omit<ButtonProps, "onClick" | "variant" | "type"> & { value: Response }>;
@@ -32,8 +32,14 @@ export const Modal = createCallable<ModalProps, Response | undefined>(({ call, b
         <Typography variant="body">{message}</Typography>
 
         <Box flexDirection="row" gap={2}>
-          {buttons.map(button => (
-            <Button key={button.value} onClick={() => call.end(button.value)} variant="secondary" type="button" {...button} />
+          {buttons.map((button) => (
+            <Button
+              key={button.value}
+              onClick={() => call.end(button.value)}
+              variant="secondary"
+              type="button"
+              {...button}
+            />
           ))}
         </Box>
       </Box>
@@ -50,8 +56,8 @@ const dialogCss = css({
   boxShadow: "0 0 #000, 0 0 #000, 0 25px 50px -12px rgba(0, 0, 0, 0.25)",
   margin: "auto auto",
   padding: 0,
-  "_backdrop": {
+  _backdrop: {
     backgroundColor: "black",
-    opacity: 0.75,
-  },
+    opacity: 0.75
+  }
 });

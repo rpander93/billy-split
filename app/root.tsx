@@ -1,9 +1,9 @@
-import { captureRemixErrorBoundaryError } from "@sentry/remix";
-import { Links, Meta, Outlet, Scripts, ScrollRestoration, useRouteError } from "@remix-run/react";
 import type { LinksFunction, MetaFunction } from "@remix-run/node";
+import { Links, Meta, Outlet, Scripts, ScrollRestoration, useRouteError } from "@remix-run/react";
+import { captureRemixErrorBoundaryError } from "@sentry/remix";
 
-import { css } from "~/styled-system/css";
 import { Modal } from "~/components/modal";
+import { css } from "~/styled-system/css";
 
 import styles from "./root.css?url";
 
@@ -12,31 +12,34 @@ export const links: LinksFunction = () => [
   {
     rel: "preconnect",
     href: "https://fonts.gstatic.com",
-    crossOrigin: "anonymous",
+    crossOrigin: "anonymous"
   },
   {
     rel: "stylesheet",
-    href: "https://fonts.googleapis.com/css2?family=Inconsolata:wght@200..900&family=Lato:wght@400;700;900&family=Nanum+Pen+Script&family=PT+Serif:wght@400;700&display=swap",
+    href: "https://fonts.googleapis.com/css2?family=Inconsolata:wght@200..900&family=Lato:wght@400;700;900&family=Nanum+Pen+Script&family=PT+Serif:wght@400;700&display=swap"
   },
   {
     rel: "stylesheet",
-    href: styles,
+    href: styles
   }
 ];
 
 export const meta: MetaFunction = () => [
   {
     property: "description",
-    content: "Split bills and track who paid back what",
+    content: "Split bills and track who paid back what"
   },
   { property: "og:title", content: "Billy - Split with friends" },
   {
     property: "og:description",
-    content: "Split bills and track who paid back what",
+    content: "Split bills and track who paid back what"
   },
   { property: "og:url", content: import.meta.env.VITE_HTTP_HOST as string },
-  { property: "og:image", content: `${import.meta.env.VITE_HTTP_HOST as string}/favicon.ico` },
-  { title: "Billy - Scan bills and split with friends" },
+  {
+    property: "og:image",
+    content: `${import.meta.env.VITE_HTTP_HOST as string}/favicon.ico`
+  },
+  { title: "Billy - Scan bills and split with friends" }
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -48,7 +51,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body className={css({ display: "flex", flexDirection: "column", maxWidth: "576px", marginX: "auto", padding: 4 })}>
+      <body
+        className={css({
+          display: "flex",
+          flexDirection: "column",
+          maxWidth: "576px",
+          marginX: "auto",
+          padding: 4
+        })}
+      >
         {children}
         <Modal.Root />
         <ScrollRestoration />

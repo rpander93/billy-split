@@ -1,4 +1,4 @@
-import { BlobClient, BlobSASPermissions, BlobServiceClient } from "@azure/storage-blob";
+import { type BlobClient, BlobSASPermissions, BlobServiceClient } from "@azure/storage-blob";
 
 const CONNECTION_STRING = process.env.VITE_AZURE_BLOB_CONNECTION_STRING as string;
 const BLOB_CONTAINER = process.env.VITE_AZURE_BLOB_CONTAINER as string;
@@ -14,9 +14,7 @@ export async function link(name: string) {
 }
 
 export async function upload(file: File, name: string) {
-  await containerClient
-    .getBlockBlobClient(name)
-    .uploadData(await file.arrayBuffer());
+  await containerClient.getBlockBlobClient(name).uploadData(await file.arrayBuffer());
 }
 
 function generateSasToken(blobClient: BlobClient) {
@@ -28,8 +26,8 @@ function generateSasToken(blobClient: BlobClient) {
     permissions: BlobSASPermissions.from({
       read: true,
       write: false,
-      delete: false,
+      delete: false
     }),
-    expiresOn: expiryDate,
+    expiresOn: expiryDate
   });
 }

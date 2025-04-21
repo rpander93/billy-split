@@ -1,39 +1,42 @@
+import {
+  type ActionFunctionArgs,
+  type MetaFunction,
+  redirect,
+  unstable_createMemoryUploadHandler,
+  unstable_parseMultipartFormData
+} from "@remix-run/node";
 import { Form, useLoaderData, useNavigation } from "@remix-run/react";
-import { ActionFunctionArgs, redirect, unstable_createMemoryUploadHandler, unstable_parseMultipartFormData, type MetaFunction } from "@remix-run/node";
-import { useRef } from "react";
 import { AnimatePresence, motion } from "motion/react";
+import { useRef } from "react";
 import { z } from "zod";
 
 import { Box } from "~/components/box";
 import { Button } from "~/components/button";
+import { Logo } from "~/components/logo";
 import { ProgressIndicator } from "~/components/progress-indicator";
 import { Typography } from "~/components/typography";
 import { UploadTextMarquee } from "~/components/upload-text-marquee";
-import { css } from '~/styled-system/css';
-import { extractor } from "~/services/extractor";
 import { addScannedBill } from "~/services/bills";
-import { Logo } from "~/components/logo";
+import { extractor } from "~/services/extractor";
+import { css } from "~/styled-system/css";
 
 const MAX_FILE_SIZE_MB = process.env.VITE_MAX_FILE_SIZE_MB as unknown as number;
 
 const MEMORY_UPLOAD_HANDLER = unstable_createMemoryUploadHandler({
-  maxPartSize: MAX_FILE_SIZE_MB * 1024 * 1024,
+  maxPartSize: MAX_FILE_SIZE_MB * 1024 * 1024
 });
 
 const REQUEST_SCHEME = z.object({
   file: z.instanceof(File).and(
     z.object({
       size: z.number().max(MAX_FILE_SIZE_MB * 1024 * 1024),
-      type: z.literal("image/jpeg").or(z.literal("image/png")),
-    }),
-  ),
+      type: z.literal("image/jpeg").or(z.literal("image/png"))
+    })
+  )
 });
 
 export const meta: MetaFunction = () => {
-  return [
-    { title: "Billy Split" },
-    { name: "description", content: "Welcome to Remix!" },
-  ];
+  return [{ title: "Billy Split" }, { name: "description", content: "Welcome to Remix!" }];
 };
 
 export function loader() {
@@ -86,13 +89,21 @@ export default function LandingPage() {
 
       <Box flexDirection="column">
         <Typography variant="h1">Want to split a bill?</Typography>
-        <Typography variant="body">Billy helps you keep track of who paid you back per line item. Select an image showing the bill to get started! 💰💸</Typography>
+        <Typography variant="body">
+          Billy helps you keep track of who paid you back per line item. Select an image showing the bill to get
+          started! 💰💸
+        </Typography>
       </Box>
 
       <Form encType="multipart/form-data" method="POST">
         <AnimatePresence mode="popLayout">
           {state === "submitting" ? (
-            <motion.div key="file-upload-pending" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2 / 10 }}>
+            <motion.div
+              key="file-upload-pending"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 2 / 10 }}
+            >
               <Box flexDirection="column" marginY={2} rowGap={2}>
                 <ProgressIndicator />
                 <UploadTextMarquee />
@@ -101,8 +112,17 @@ export default function LandingPage() {
           ) : (
             <motion.div key="file-input" className={mainDivCss} exit={{ opacity: 0 }} transition={{ duration: 1 / 10 }}>
               <Box flexDirection="column" rowGap={0.25}>
-                <Button onClick={handleClick} startDecorator="📷">Pick image</Button>
-                <input ref={inputRef} className={css({ display: "none" })} name="file" onChange={handleFileSelected} type="file" accept="image/*" />
+                <Button onClick={handleClick} startDecorator="📷">
+                  Pick image
+                </Button>
+                <input
+                  ref={inputRef}
+                  className={css({ display: "none" })}
+                  name="file"
+                  onChange={handleFileSelected}
+                  type="file"
+                  accept="image/*"
+                />
                 <button ref={buttonRef} className={css({ display: "none" })} type="submit" />
                 <Typography variant="small">Take a picture or select it from your photo library</Typography>
               </Box>
@@ -131,5 +151,5 @@ export default function LandingPage() {
 const mainDivCss = css({
   display: "flex",
   flexDirection: "column",
-  rowGap: 2,
+  rowGap: 2
 });

@@ -1,7 +1,7 @@
-import { LoaderFunctionArgs, redirect } from "@remix-run/node";
+import { type LoaderFunctionArgs, redirect } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
-import { useEffect, useRef, useState } from "react";
 import QRCode from "qrcode";
+import { useEffect, useRef, useState } from "react";
 
 import { Box } from "~/components/box";
 import { Button, LinkButton } from "~/components/button";
@@ -35,10 +35,10 @@ export default function CreatedPage() {
       return;
     }
 
-    QRCode.toCanvas(canvasRef.current, shareUrl, { width: 250 }, error => {
+    QRCode.toCanvas(canvasRef.current, shareUrl, { width: 250 }, (error) => {
       console.log(error);
     });
-  }, [shareUrl])
+  }, [shareUrl]);
 
   const handleClickCopy = () => {
     navigator.clipboard.writeText(shareUrl);
@@ -50,15 +50,13 @@ export default function CreatedPage() {
     await navigator?.share?.({
       title: "Billy Split",
       text: `Hey! I'm using Billy to track the bill for "${name}" I paid recently. Can you pay me back?`,
-      url: shareUrl,
+      url: shareUrl
     });
   };
-  
+
   return (
     <Box flexDirection="column" justifyContent="center" rowGap={4}>
-      <Typography variant="h2">
-        {`👏 Great! We saved your bill for “${name}”`}
-      </Typography>
+      <Typography variant="h2">{`👏 Great! We saved your bill for “${name}”`}</Typography>
 
       <Box flexDirection="column" rowGap={2}>
         {isShareAvailable && (
@@ -79,7 +77,15 @@ export default function CreatedPage() {
       </Box>
 
       <Box flexDirection="column" justifyContent="center">
-        <Box justifyContent="center" backgroundColor="white" borderColor="gray.300" borderRadius="md" borderStyle="solid" borderWidth={1.5} padding={1}>
+        <Box
+          justifyContent="center"
+          backgroundColor="white"
+          borderColor="gray.300"
+          borderRadius="md"
+          borderStyle="solid"
+          borderWidth={1.5}
+          padding={1}
+        >
           <canvas ref={canvasRef} style={{ height: QRCODE_SIZE, width: QRCODE_SIZE }} />
         </Box>
 

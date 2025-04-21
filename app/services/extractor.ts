@@ -1,4 +1,4 @@
-import { ScannedBill } from "~/types";
+import type { ScannedBill } from "~/types";
 
 const FORM_RECOGNIZER_URL = process.env.VITE_AZURE_FORM_RECOGNIZER_URL as string;
 const FORM_RECOGNIZER_API_KEY = process.env.VITE_AZURE_FORM_RECOGNIZER_API_KEY as string;
@@ -11,7 +11,7 @@ export async function extractor(image: File) {
   if (null === locationUri) throw new Error("Upstream failed. Missing 'Operation-Location' header.");
 
   let loopCount = 0;
-  while(loopCount < 10) {
+  while (loopCount < 10) {
     await sleep(500);
 
     const scanOutcome = await pollScanOutcome(locationUri);
@@ -33,9 +33,9 @@ function queueParseImage(file: File) {
     method: "POST",
     headers: {
       "Content-Type": file.type,
-      "Ocp-Apim-Subscription-Key": FORM_RECOGNIZER_API_KEY,
+      "Ocp-Apim-Subscription-Key": FORM_RECOGNIZER_API_KEY
     },
-    body: file.stream(),
+    body: file.stream()
   });
 }
 
@@ -44,13 +44,15 @@ function pollScanOutcome(location: string) {
     method: "GET",
     headers: {
       "Ocp-Apim-Subscription-Key": FORM_RECOGNIZER_API_KEY
-    },
+    }
   });
 }
 
 function parseAzureResponse(response: AnalyzeResponseType): ScannedBill {
   if (!response.analyzeResult?.documents[0]) {
-    throw new Response("Upstream failed. No analyzed document returned", { status: 502 });
+    throw new Response("Upstream failed. No analyzed document returned", {
+      status: 502
+    });
   }
 
   const document = response.analyzeResult.documents[0];
@@ -65,20 +67,19 @@ function parseAzureResponse(response: AnalyzeResponseType): ScannedBill {
         | undefined) ?? null,
     line_items:
       // @ts-expect-error no exhaustive types for document
-      document.fields.Items.valueArray?.map(element => ({
+      document.fields.Items.valueArray?.map((element) => ({
         description: element.valueObject.Description?.valueString ?? "Unknown",
         amount: element.valueObject.Quantity?.valueNumber ?? 1,
-        total_price: element.valueObject.TotalPrice?.valueNumber ?? 0.0,
-      })) ?? [],
+        total_price: element.valueObject.TotalPrice?.valueNumber ?? 0.0
+      })) ?? []
   };
 }
 
 function sleep(ms: number) {
-  return new Promise<void>(resolve => {
+  return new Promise<void>((resolve) => {
     setTimeout(() => resolve(), ms);
   });
 }
-
 
 interface AnalyzeResponseType {
   status: string;

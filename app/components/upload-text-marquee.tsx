@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
+import { useEffect, useState } from "react";
 
 import { Typography } from "./typography";
 
@@ -8,13 +8,13 @@ export function UploadTextMarquee() {
 
   useEffect(() => {
     const intervalId = setInterval(
-      () => setIndex(current => Math.min(current + 1, TEASER_TEXTS.length)),
+      () => setIndex((current) => Math.min(current + 1, TEASER_TEXTS.length)),
       ANIMATION_DURATION
     );
 
     return () => clearInterval(intervalId);
   }, []);
- 
+
   return (
     <AnimatePresence mode="popLayout">
       <motion.div
@@ -51,7 +51,7 @@ const TEASER_TEXTS = [
   "Uploading image...",
   "Extracting text from image...",
   "Finding venue name...",
-  "Finding line items...",
+  "Finding line items..."
 ];
 
 const ANIMATION_DURATION = 4000;

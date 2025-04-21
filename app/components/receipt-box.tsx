@@ -1,5 +1,5 @@
-import { styled } from "~/styled-system/jsx";
 import { cva } from "~/styled-system/css";
+import { styled } from "~/styled-system/jsx";
 
 import { Box } from "./box";
 
@@ -25,9 +25,9 @@ const receiptBoxCss = cva({
       fontFamily: "Inconsolata"
     },
     "& span": {
-      fontFamily: "Inconsolata",
-    },
-  },
+      fontFamily: "Inconsolata"
+    }
+  }
 });
 
 export const ReceiptBox = styled(Box, receiptBoxCss);

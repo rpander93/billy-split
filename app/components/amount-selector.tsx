@@ -14,18 +14,32 @@ interface AmountSelectorProps {
 export function AmountSelector({ minusDisabled, plusDisabled, label, onMinusClick, onPlusClick }: AmountSelectorProps) {
   return (
     <Box alignItems="center">
-      <button className={css(quantityButtonCss, minusButtonCss)} disabled={minusDisabled} onClick={() => onMinusClick()} type="button">
-        <Typography fontSize="md" fontWeight="bold">-</Typography>
+      <button
+        className={css(quantityButtonCss, minusButtonCss)}
+        disabled={minusDisabled}
+        onClick={() => onMinusClick()}
+        type="button"
+      >
+        <Typography fontSize="md" fontWeight="bold">
+          -
+        </Typography>
       </button>
-      
+
       <div className={currentAmountBlob}>
         <Typography color="black" fontWeight="bold" fontSize="small">
           {label}
         </Typography>
       </div>
-      
-      <button className={css(quantityButtonCss, plusButtonCss)} disabled={plusDisabled} onClick={() => onPlusClick()} type="button">
-        <Typography fontSize="md" fontWeight="bold">+</Typography>
+
+      <button
+        className={css(quantityButtonCss, plusButtonCss)}
+        disabled={plusDisabled}
+        onClick={() => onPlusClick()}
+        type="button"
+      >
+        <Typography fontSize="md" fontWeight="bold">
+          +
+        </Typography>
       </button>
     </Box>
   );
@@ -39,7 +53,7 @@ const currentAmountBlob = css({
   justifyContent: "center",
   height: 8,
   padding: 3.5,
-  zIndex: 2,
+  zIndex: 2
 });
 
 const quantityButtonCss = css.raw({
@@ -53,9 +67,9 @@ const quantityButtonCss = css.raw({
   zIndex: 1,
   _hover: {
     "&:not(:disabled)": {
-      backgroundColor: "gray.100",
+      backgroundColor: "gray.100"
     }
-  },
+  }
 });
 
 const minusButtonCss = css.raw({
@@ -63,7 +77,7 @@ const minusButtonCss = css.raw({
   borderBottomLeftRadius: "md",
   marginRight: -3,
   paddingInline: 4,
-  textAlign: "start",
+  textAlign: "start"
 });
 
 const plusButtonCss = css.raw({
@@ -71,5 +85,5 @@ const plusButtonCss = css.raw({
   borderBottomRightRadius: "md",
   marginLeft: -3,
   paddingInline: 4,
-  textAlign: "end",
+  textAlign: "end"
 });

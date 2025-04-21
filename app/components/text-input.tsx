@@ -10,26 +10,26 @@ export const inputCss = cva({
     borderWidth: 1,
     paddingX: 2,
     paddingY: 1,
-    "_disabled": {
-      opacity: 0.5,
+    _disabled: {
+      opacity: 0.5
     },
-    "_focus": {
+    _focus: {
       boxShadow: "0 0 #0000",
       outlineWidth: "1.5px",
       outlineStyle: "solid",
-      outlineColor: "gray.500",
+      outlineColor: "gray.500"
     },
-    "_readOnly": {
-      cursor: "not-allowed",
-    },
+    _readOnly: {
+      cursor: "not-allowed"
+    }
   },
   variants: {
     space: {
       small: {
-        paddingY: 1 / 2,
-      },
-    },
-  },
+        paddingY: 1 / 2
+      }
+    }
+  }
 });
 
 export const TextInput = styled("input", inputCss);

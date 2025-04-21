@@ -1,4 +1,4 @@
-import { LoaderFunctionArgs, redirect } from "@remix-run/node";
+import { type LoaderFunctionArgs, redirect } from "@remix-run/node";
 import { findSubmittedBill } from "~/services/bills";
 import { link } from "~/services/files";
 

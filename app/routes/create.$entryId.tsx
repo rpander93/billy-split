@@ -1,4 +1,4 @@
-import { ActionFunctionArgs, LoaderFunctionArgs, redirect } from "@remix-run/node";
+import { type ActionFunctionArgs, type LoaderFunctionArgs, redirect } from "@remix-run/node";
 import { Form, useLoaderData, useNavigation } from "@remix-run/react";
 import { Fragment, useRef, useState } from "react";
 import { z } from "zod";
@@ -16,7 +16,7 @@ import { extractFirstUrl, formatCurrencyWithoutSymbol, tryParseFloat } from "~/f
 import { parseFormData } from "~/parse-form-data";
 import { addSubmittedBill, findScannedBill } from "~/services/bills";
 import { css } from "~/styled-system/css";
-import { SubmittedBill } from "~/types";
+import type { SubmittedBill } from "~/types";
 
 export async function loader({ params }: LoaderFunctionArgs) {
   const element = await findScannedBill(params.entryId as string);
@@ -27,10 +27,10 @@ export async function loader({ params }: LoaderFunctionArgs) {
     service_fee: 0,
     payment_method: "",
     currency: element.currency ?? "EUR",
-    line_items: element.line_items.map(item => ({
+    line_items: element.line_items.map((item) => ({
       ...item,
-      is_deleted: false,
-    })),
+      is_deleted: false
+    }))
   };
 }
 
@@ -55,17 +55,18 @@ export default function CreatePage() {
   const [usingPaymentMethod, setUsingPaymentMethod] = useState<"payment_request" | "other">();
 
   const handleClickCreate = () => {
-    setItems(current => ([
-      ...current, {
+    setItems((current) => [
+      ...current,
+      {
         amount: undefined,
         description: undefined,
         total_price: undefined,
-        is_deleted: false,
+        is_deleted: false
       }
-    ]));
+    ]);
   };
 
-  const handlePaste: React.ClipboardEventHandler<HTMLInputElement> = event => {
+  const handlePaste: React.ClipboardEventHandler<HTMLInputElement> = (event) => {
     const value = event.clipboardData.getData("text");
     const urlFoundInText = extractFirstUrl(value);
     const inputElement$ = event.target as HTMLInputElement;
@@ -74,7 +75,7 @@ export default function CreatePage() {
       const nextValue = urlFoundInText !== null && urlFoundInText.length > 0 ? urlFoundInText : value;
       inputElement$.value = nextValue;
     });
-  }
+  };
 
   const updateServiceFee = (nextAmount: number) => {
     setServiceFee(nextAmount);
@@ -118,11 +119,7 @@ export default function CreatePage() {
                 textAlign="center"
                 required
               />
-              <CurrencyInput
-                defaultValue={element.currency}
-                name="currency"
-                required
-              />
+              <CurrencyInput defaultValue={element.currency} name="currency" required />
             </Box>
           </Box>
 
@@ -131,26 +128,31 @@ export default function CreatePage() {
               const handleChangeAmount = (event: React.FocusEvent<HTMLInputElement>) => {
                 const amount = updateAmount(item.amount ?? 0, event.target.value);
                 event.target.value = String(amount);
-                setItems(current => current.with(index, { ...item, amount: amount }));
-              }
+                setItems((current) => current.with(index, { ...item, amount: amount }));
+              };
 
               const handleChangeTotalPrice = (event: React.FocusEvent<HTMLInputElement>) => {
                 const total_price = updateTotalPrice(item.total_price ?? 0, event.target.value);
                 event.target.value = formatCurrencyWithoutSymbol(total_price);
-                setItems(current => current.with(index, { ...item, total_price }));
+                setItems((current) => current.with(index, { ...item, total_price }));
               };
 
               const handleChangeDescription = (event: React.ChangeEvent<HTMLInputElement>) => {
-                setItems(current => current.with(index, { ...item, description: event.target.value }));
+                setItems((current) =>
+                  current.with(index, {
+                    ...item,
+                    description: event.target.value
+                  })
+                );
               };
 
               const handleClickDelete = () => {
                 if (item.amount === undefined || item.amount === 0) {
-                  setItems(current => current.filter((_x, _xindex) => _xindex !== index));
+                  setItems((current) => current.filter((_x, _xindex) => _xindex !== index));
                 } else {
                   const isDeleted = !item.is_deleted;
                   document.querySelector(`input[name="line_items[${index}][is_deleted]"]`)!.value = isDeleted;
-                  setItems(current => current.with(index, { ...item, is_deleted: isDeleted }));
+                  setItems((current) => current.with(index, { ...item, is_deleted: isDeleted }));
                 }
               };
 
@@ -178,10 +180,16 @@ export default function CreatePage() {
                       placeholder="Item"
                       required
                       space="small"
-                      style={{ width: `${42 + Math.min((item.description?.length ?? 0) + 4, 20) * 6}px` }}
+                      style={{
+                        width: `${42 + Math.min((item.description?.length ?? 0) + 4, 20) * 6}px`
+                      }}
                     />
                     <TextInput
-                      defaultValue={item.total_price !== undefined ? formatCurrencyWithoutSymbol(item.total_price) : item.total_price}
+                      defaultValue={
+                        item.total_price !== undefined
+                          ? formatCurrencyWithoutSymbol(item.total_price)
+                          : item.total_price
+                      }
                       disabled={item.is_deleted}
                       marginLeft="auto"
                       name={`line_items[${index}][total_price]`}
@@ -211,7 +219,7 @@ export default function CreatePage() {
             })}
 
             <Box>
-              <button className={addMeButtonCss} onClick={handleClickCreate}>
+              <button className={addMeButtonCss} onClick={handleClickCreate} type="button">
                 🆕 Add item
               </button>
             </Box>
@@ -220,7 +228,14 @@ export default function CreatePage() {
           <Box flexDirection="column" rowGap={1}>
             <Box flexDirection="row" justifyContent="space-between">
               <Typography>Subtotal</Typography>
-              <TextInput name="subtotal_price" readOnly space="small" size={8} textAlign="right" value={formatCurrencyWithoutSymbol(subTotalPrice)} />
+              <TextInput
+                name="subtotal_price"
+                readOnly
+                space="small"
+                size={8}
+                textAlign="right"
+                value={formatCurrencyWithoutSymbol(subTotalPrice)}
+              />
             </Box>
             <Box alignItems="center" flexDirection="row" justifyContent="space-between">
               <Typography>Service</Typography>
@@ -228,7 +243,7 @@ export default function CreatePage() {
                 <Box alignItems="center" columnGap={1}>
                   <Typography>(%)</Typography>
                   <ButtonGroup size="sm">
-                    {AVAILABLE_TIPS.map(element => {  
+                    {AVAILABLE_TIPS.map((element) => {
                       const handleClick = () => {
                         const nextTipAmount = element * subTotalPrice;
                         updateServiceFee(nextTipAmount);
@@ -256,7 +271,15 @@ export default function CreatePage() {
             </Box>
             <Box flexDirection="row" justifyContent="space-between">
               <Typography>Total</Typography>
-              <TextInput color="black" fontWeight="bold" readOnly size={8} space="small" textAlign="right" value={formatCurrencyWithoutSymbol(totalPrice)} />
+              <TextInput
+                color="black"
+                fontWeight="bold"
+                readOnly
+                size={8}
+                space="small"
+                textAlign="right"
+                value={formatCurrencyWithoutSymbol(totalPrice)}
+              />
             </Box>
           </Box>
         </ReceiptBox>
@@ -265,19 +288,37 @@ export default function CreatePage() {
           <FormLabel>How do you want to get paid?</FormLabel>
 
           <Box flexDirection="row" columnGap={2}>
-            <input type="radio" name="payment_method_selector" id="paymentMethodSelector1" value="payment_request" onClick={() => setUsingPaymentMethod("payment_request")} required />
+            <input
+              type="radio"
+              name="payment_method_selector"
+              id="paymentMethodSelector1"
+              value="payment_request"
+              onClick={() => setUsingPaymentMethod("payment_request")}
+              required
+            />
             <label htmlFor="paymentMethodSelector1">Payment request</label>
 
             <Box width={2} />
 
-            <input type="radio" name="payment_method_selector" id="paymentMethodSelector2" value="other" onClick={() => setUsingPaymentMethod("other")} required />
+            <input
+              type="radio"
+              name="payment_method_selector"
+              id="paymentMethodSelector2"
+              value="other"
+              onClick={() => setUsingPaymentMethod("other")}
+              required
+            />
             <label htmlFor="paymentMethodSelector2">Other</label>
           </Box>
         </Box>
 
         {usingPaymentMethod !== undefined && (
           <Box flexDirection="column" rowGap={1}>
-            <FormLabel htmlFor="payment_method">{usingPaymentMethod === "payment_request" ? "Link to payment request" : "Indicate how you want to be paid back"}</FormLabel>
+            <FormLabel htmlFor="payment_method">
+              {usingPaymentMethod === "payment_request"
+                ? "Link to payment request"
+                : "Indicate how you want to be paid back"}
+            </FormLabel>
             <TextInput name="payment_method" onPaste={handlePaste} required type="text" />
             <FormHelper>A link will be extracted from any text you copy paste</FormHelper>
           </Box>
@@ -295,24 +336,32 @@ const submitShape = z.object({
   name: z.string(),
   date: z.string().regex(/\d{4}-\d{2}-\d{2}/),
   currency: z.string(),
-  service_fee: z.string()
+  service_fee: z
+    .string()
     .nullable()
-    .transform(v => v !== null ? tryParseFloat(v) : null)
+    .transform((v) => (v !== null ? tryParseFloat(v) : null))
     .pipe(z.number().nullable()),
   payment_method: z.string(),
-  line_items: z.record(z.string(), z.object({
-    is_deleted: z.string()
-      .transform(v => v === "1")
-      .pipe(z.boolean()),
-    description: z.string(),
-    amount: z.string()
-      .transform(v => tryParseFloat(v))
-      .pipe(z.number()),
-    total_price: z.string()
-      .transform(v => tryParseFloat(v))
-      .pipe(z.number()),
-  }))
-    .transform(v => Object.values(v)),
+  line_items: z
+    .record(
+      z.string(),
+      z.object({
+        is_deleted: z
+          .string()
+          .transform((v) => v === "1")
+          .pipe(z.boolean()),
+        description: z.string(),
+        amount: z
+          .string()
+          .transform((v) => tryParseFloat(v))
+          .pipe(z.number()),
+        total_price: z
+          .string()
+          .transform((v) => tryParseFloat(v))
+          .pipe(z.number())
+      })
+    )
+    .transform((v) => Object.values(v))
 });
 
 const addMeButtonCss = css({
@@ -324,8 +373,8 @@ const addMeButtonCss = css({
   height: 8,
   _hover: {
     backgroundColor: "gray.100",
-    cursor: "pointer",
-  },
+    cursor: "pointer"
+  }
 });
 
 interface ItemState {
@@ -337,14 +386,14 @@ interface ItemState {
 
 function calculateSubTotal(items: ItemState[]) {
   return items
-    .filter(element => (element.amount ?? 0) > 0)
-    .filter(element => !element.is_deleted)
+    .filter((element) => (element.amount ?? 0) > 0)
+    .filter((element) => !element.is_deleted)
     .reduce((sum, element) => sum + (element.total_price ?? 0), 0);
 }
 
 function updateAmount(current: number, input: string) {
   const nextValue = tryParseFloat(input);
-  
+
   return typeof nextValue === "number" ? nextValue : current;
 }
 

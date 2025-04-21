@@ -1,11 +1,11 @@
-import { styled } from '~/styled-system/jsx'
-import { cva } from '~/styled-system/css'
+import { cva } from "~/styled-system/css";
+import { styled } from "~/styled-system/jsx";
 
 export const typography = cva({
   base: {
     color: "text",
     fontSize: "1rem",
-    fontWeight: 400,
+    fontWeight: 400
   },
   variants: {
     variant: {
@@ -13,33 +13,33 @@ export const typography = cva({
         color: "text-header",
         fontFamily: "Lato",
         fontWeight: 900,
-        fontSize: "2rem",
+        fontSize: "2rem"
       },
       h2: {
         color: "text-header",
         fontFamily: "Lato",
         fontWeight: 700,
-        fontSize: "1.5rem",
+        fontSize: "1.5rem"
       },
       h3: {
         color: "text-header",
         fontFamily: "Lato",
         fontWeight: 500,
-        fontSize: "1.25rem",
+        fontSize: "1.25rem"
       },
       body: {
-        fontSize: "1rem",
+        fontSize: "1rem"
       },
       small: {
         color: "text-subtle",
-        fontSize: "0.85rem",
+        fontSize: "0.85rem"
       },
       logo: {
         fontFamily: "Nanum Pen Script",
-        fontSize: 20,
+        fontSize: 20
       }
-    },
+    }
   }
 });
 
-export const Typography = styled('span', typography);
+export const Typography = styled("span", typography);

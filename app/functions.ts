@@ -1,4 +1,4 @@
-import { OnlineSubmittedBill, SubmittedBill } from "./types";
+import type { OnlineSubmittedBill, SubmittedBill } from "./types";
 
 export function isNumber(value: number | string): value is number {
   return typeof value === "number" && !Number.isNaN(value) && Number.isFinite(value);
@@ -6,7 +6,7 @@ export function isNumber(value: number | string): value is number {
 
 export function tryParseFloat(value: string) {
   const normalizedVal = value.replaceAll(",", ".");
-  const retVal = parseFloat(normalizedVal);
+  const retVal = Number.parseFloat(normalizedVal);
 
   return isNumber(retVal) ? retVal : value;
 }
@@ -18,7 +18,7 @@ export function removeCurrencySymbol(value: string) {
 export function formatCurrency(value: string | number, currencyCode: string) {
   const currencyFormatter = new Intl.NumberFormat("nl-NL", {
     style: "currency",
-    currency: currencyCode,
+    currency: currencyCode
   });
   const parsedValue = typeof value === "string" ? tryParseFloat(value) : value;
 
@@ -41,7 +41,6 @@ export function extractFirstUrl(text: string) {
   return match ? match[0] : null;
 }
 
-
 export function sum(value: number[]) {
   return value.reduce((accumulator, current) => accumulator + current, 0);
 }
@@ -53,71 +52,71 @@ export function round(value: number, fractions = 1) {
 export function formatDecimal(decimal: number) {
   if (decimal === 0) return "0";
   if (Number.isInteger(decimal)) return decimal.toString();
-  
+
   // Handle negative numbers
   const sign = decimal < 0 ? "-" : "";
   decimal = Math.abs(decimal);
-  
+
   // Maximum denominator to consider for approximation
-  const precision = 1.0E-10;
+  const precision = 1.0e-10;
   const maxDenominator = 1000;
-  
+
   let bestNumerator = 1;
   let bestDenominator = 1;
   let bestError = Math.abs(decimal - bestNumerator / bestDenominator);
-  
+
   for (let denominator = 1; denominator <= maxDenominator; denominator++) {
     // Calculate the closest numerator for this denominator
     const numerator = Math.round(decimal * denominator);
     const error = Math.abs(decimal - numerator / denominator);
-    
+
     if (error < bestError) {
-        bestError = error;
-        bestNumerator = numerator;
-        bestDenominator = denominator;
+      bestError = error;
+      bestNumerator = numerator;
+      bestDenominator = denominator;
     }
-    
+
     // If we've found a sufficiently good approximation, stop
     if (error < precision) break;
   }
-  
+
   // Simplify the fraction by finding GCD
-  const gcd = (a: number, b: number): number => b === 0 ? a : gcd(b, a % b);
+  const gcd = (a: number, b: number): number => (b === 0 ? a : gcd(b, a % b));
   const divisor = gcd(bestNumerator, bestDenominator);
-  
+
   bestNumerator /= divisor;
   bestDenominator /= divisor;
-  
+
   // Convert to mixed fraction if numerator is greater than denominator
   if (bestNumerator >= bestDenominator) {
     const wholeNumber = Math.floor(bestNumerator / bestDenominator);
     const remainder = bestNumerator % bestDenominator;
-    
+
     if (remainder === 0) {
       return `${sign}${wholeNumber}`;
     } else {
       return `${sign}${wholeNumber} ${remainder}/${bestDenominator}`;
     }
   }
-  
+
   return `${sign}${bestNumerator}/${bestDenominator}`;
 }
 
 export function parseServerToSelectionState(bill: OnlineSubmittedBill) {
-  const stateItems = bill.line_items.map(element => {
+  const stateItems = bill.line_items.map((element) => {
     const payment_items = bill.payment_items
-      .map(payment_item => {
-        const line_items = payment_item.line_items.filter(payment => payment.line_item_index === element.index);
+      .map((payment_item) => {
+        const line_items = payment_item.line_items.filter((payment) => payment.line_item_index === element.index);
 
         return {
           creator: payment_item.creator,
-          amount: sum(line_items.map(item => item.amount)),
+          amount: sum(line_items.map((item) => item.amount))
         };
       })
-      .filter(payment_item => payment_item.amount > 0);
+      .filter((payment_item) => payment_item.amount > 0);
 
     const current_amount = 0;
-    const prior_amount = sum(payment_items.map(payment_item => payment_item.amount));
+    const prior_amount = sum(payment_items.map((payment_item) => payment_item.amount));
     const remaining_amount = Math.round((element.amount - current_amount - prior_amount) * 10) / 10;
 
     return {
@@ -127,7 +126,7 @@ export function parseServerToSelectionState(bill: OnlineSubmittedBill) {
       remaining_amount,
       payment_items,
       mode: "undecided",
-      splitting_denumerator: undefined as number | undefined,
+      splitting_denumerator: undefined as number | undefined
     };
   });
 
@@ -145,33 +144,34 @@ export function parseServerToSelectionState(bill: OnlineSubmittedBill) {
 }
 
 export const calculate = {
-  total: function (items: ReturnType<typeof parseServerToSelectionState>) {
-    return items.reduce((accumulator, current) => accumulator + (current.amount * current.unit_price), 0);
-  },
-  current: function (bill: OnlineSubmittedBill, items: ReturnType<typeof parseServerToSelectionState>) {
-    return items.reduce((accumulator, current) => {
-      const lineItem = bill.line_items.find(l => l.index === current.index);
-  
+  total: (items: ReturnType<typeof parseServerToSelectionState>) =>
+    items.reduce((accumulator, current) => accumulator + current.amount * current.unit_price, 0),
+  current: (bill: OnlineSubmittedBill, items: ReturnType<typeof parseServerToSelectionState>) =>
+    items.reduce((accumulator, current) => {
+      const lineItem = bill.line_items.find((l) => l.index === current.index);
+
       if (lineItem === undefined) {
         return accumulator;
       }
-  
+
       return accumulator + current.current_amount * lineItem.unit_price;
-    }, 0);
-  },
-  remaining: function (bill: OnlineSubmittedBill, totalSum: number, currentSum: number) {
+    }, 0),
+  remaining: (bill: OnlineSubmittedBill, totalSum: number, currentSum: number) => {
     const paidPreviously = bill.payment_items.reduce((accumulator, current) => {
-      return accumulator + sum(
-        current.line_items.map(line_item => {
-          const item = bill.line_items.find(x_item => x_item.index === line_item.line_item_index)!;
-  
-          return item.unit_price * line_item.amount;
-        }),
+      return (
+        accumulator +
+        sum(
+          current.line_items.map((line_item) => {
+            const item = bill.line_items.find((x_item) => x_item.index === line_item.line_item_index)!;
+
+            return item.unit_price * line_item.amount;
+          })
+        )
       );
     }, 0);
-  
+
     return totalSum - paidPreviously - currentSum;
-  },
+  }
 };
 
 export function parsePaymentMethod(paymentMethod: SubmittedBill["payment_method"]) {

@@ -1,8 +1,8 @@
-import { cva } from "~/styled-system/css";
-import { Typography } from "./typography";
-import { Box } from "./box";
-import { BoxProps } from "~/styled-system/jsx";
 import { Children, cloneElement } from "react";
+import { cva } from "~/styled-system/css";
+import type { BoxProps } from "~/styled-system/jsx";
+import { Box } from "./box";
+import { Typography } from "./typography";
 
 export interface ButtonProps {
   children: React.ReactNode;
@@ -17,7 +17,18 @@ export interface ButtonProps {
   variant?: "primary" | "secondary" | "ghost";
 }
 
-export function Button({ children, flex, loading, hover, startDecorator, onClick, position = "standalone", size = "md", type = "button", variant = "primary" }: ButtonProps) {  
+export function Button({
+  children,
+  flex,
+  loading,
+  hover,
+  startDecorator,
+  onClick,
+  position = "standalone",
+  size = "md",
+  type = "button",
+  variant = "primary"
+}: ButtonProps) {
   const className = buttonStyle({
     position,
     size,
@@ -26,7 +37,13 @@ export function Button({ children, flex, loading, hover, startDecorator, onClick
   });
 
   return (
-    <button className={className} data-hover={hover === true ? true : undefined} onClick={onClick} type={type} style={{ flex }}>
+    <button
+      className={className}
+      data-hover={hover === true ? true : undefined}
+      onClick={onClick}
+      type={type}
+      style={{ flex }}
+    >
       {loading ? "⏳" : startDecorator}
       <Typography color="text" fontWeight="700" variant={size === "md" ? "body" : "small"}>
         {children}
@@ -40,11 +57,20 @@ interface LinkButtonProps extends Pick<ButtonProps, "children" | "startDecorator
   target?: React.ComponentProps<"a">["target"];
 }
 
-export function LinkButton({ children, href, startDecorator, size = "md", target, variant = "primary" }: LinkButtonProps) {
+export function LinkButton({
+  children,
+  href,
+  startDecorator,
+  size = "md",
+  target,
+  variant = "primary"
+}: LinkButtonProps) {
   return (
     <a className={buttonStyle({ size, variant })} href={href} target={target} rel="noopener noreferer">
       {startDecorator}
-      <Typography color="text" fontWeight="700" variant={size === "md" ? "body" : "small"}>{children}</Typography>
+      <Typography color="text" fontWeight="700" variant={size === "md" ? "body" : "small"}>
+        {children}
+      </Typography>
     </a>
   );
 }
@@ -61,15 +87,14 @@ export function ButtonGroup({ children, size, ...restProps }: ButtonGroupProps) 
   return (
     <Box {...restProps}>
       {Children.map(children, (element, index) => {
-        const position = length === 1
-          ? "standalone"
-          : index === 0
-            ? "start"
-            : index === length - 1
-              ? "end"
-              : "middle";
+        const position = length === 1 ? "standalone" : index === 0 ? "start" : index === length - 1 ? "end" : "middle";
 
-        return cloneElement(element, { flex, position, size, variant: "secondary" });
+        return cloneElement(element, {
+          flex,
+          position,
+          size,
+          variant: "secondary"
+        });
       })}
     </Box>
   );
@@ -83,58 +108,58 @@ const buttonStyle = cva({
     cursor: "pointer",
     display: "inline-flex",
     justifyContent: "center",
-    "_disabled": {
+    _disabled: {
       opacity: 0.5,
-      pointerEvents: "none",
-    },
+      pointerEvents: "none"
+    }
   },
   variants: {
     variant: {
       primary: {
         backgroundColor: "gold",
-        "_hover": {
-          backgroundColor: "#FBC901",
-        },
+        _hover: {
+          backgroundColor: "#FBC901"
+        }
       },
       secondary: {
         backgroundColor: "white",
         borderColor: "gray.300",
         borderStyle: "solid",
         borderWidth: 1.5,
-        "_hover": {
-          backgroundColor: "gray.100",
-        },
+        _hover: {
+          backgroundColor: "gray.100"
+        }
       },
       ghost: {
         borderWidth: 0,
-        "_hover": {
-          backgroundColor: "gray.50",
-        },
-      },
+        _hover: {
+          backgroundColor: "gray.50"
+        }
+      }
     },
     position: {
       start: {
         borderTopLeftRadius: "md",
         borderBottomLeftRadius: "md",
         borderTopRightRadius: 0,
-        borderBottomRightRadius: 0,
+        borderBottomRightRadius: 0
       },
       middle: {
         borderStartWidth: 0,
-        borderRadius: 0,
+        borderRadius: 0
       },
       end: {
         borderStartWidth: 0,
         borderTopLeftRadius: 0,
         borderBottomLeftRadius: 0,
         borderTopRightRadius: "md",
-        borderBottomRightRadius: "md",
+        borderBottomRightRadius: "md"
       },
       standalone: {
         borderColor: "transparent",
         borderRadius: "md",
-        borderWidth: 1,
-      },
+        borderWidth: 1
+      }
     },
     size: {
       none: {
@@ -142,17 +167,17 @@ const buttonStyle = cva({
       },
       sm: {
         paddingX: 2,
-        paddingY: 1,
+        paddingY: 1
       },
       md: {
         paddingX: 4,
-        paddingY: 2,
-      },
+        paddingY: 2
+      }
     },
     status: {
       loading: {
-        opacity: 0.5,
-      },
-    },
-  },
+        opacity: 0.5
+      }
+    }
+  }
 });

@@ -1,4 +1,4 @@
-import { OnlineScannedBill, OnlineSubmittedBill, ScannedBill, SubmittedBill } from "~/types";
+import type { OnlineScannedBill, OnlineSubmittedBill, ScannedBill, SubmittedBill } from "~/types";
 import { database } from "./database";
 import { upload } from "./files";
 
@@ -10,12 +10,12 @@ export async function addSubmittedBill(scannedBillId: string, submitted: Submitt
   if (scanned === null) throw new Error(`Cannot find scanned item with id "${scannedBillId}"`);
 
   const submittedLineItems = submitted.line_items
-    .filter(x => x.is_deleted === false)
+    .filter((x) => x.is_deleted === false)
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     .map(({ is_deleted, ...item }, index) => ({
       ...item,
       index,
-      unit_price: item.total_price / item.amount,
+      unit_price: item.total_price / item.amount
     }));
 
   if (submitted.service_fee !== null && submitted.service_fee > 0) {
@@ -24,7 +24,7 @@ export async function addSubmittedBill(scannedBillId: string, submitted: Submitt
       unit_price: submitted.service_fee,
       amount: 1,
       total_price: submitted.service_fee,
-      description: "Service fee",
+      description: "Service fee"
     });
   }
 
@@ -34,17 +34,17 @@ export async function addSubmittedBill(scannedBillId: string, submitted: Submitt
       ...submitted,
       line_items: submittedLineItems,
       number_of_payments: 0,
-      payment_items: [],
+      payment_items: []
     }),
-    database.container(CONTAINER_SCANS)
-      .deleteAllItemsForPartitionKey(scannedBillId),
+    database.container(CONTAINER_SCANS).deleteAllItemsForPartitionKey(scannedBillId)
   ]);
 
   return scanned.share_code;
 }
 
 export async function findSubmittedBill(elementId: string) {
-  const { resource } = await database.container(CONTAINER_ENTRIES)
+  const { resource } = await database
+    .container(CONTAINER_ENTRIES)
     .item(elementId, elementId)
     .read<OnlineSubmittedBill>();
 
@@ -62,7 +62,7 @@ export async function addScannedBill(element: ScannedBill, file: File): Promise<
     file_name: shareCode + fileExtension,
     created_on: Date.now() / 1000,
     date: element.date !== null ? ensureYMD(element.date) : formatYMD(),
-    share_code: shareCode,
+    share_code: shareCode
   };
 
   await Promise.all([
@@ -74,9 +74,7 @@ export async function addScannedBill(element: ScannedBill, file: File): Promise<
 }
 
 export async function findScannedBill(elementId: string): Promise<OnlineScannedBill | null> {
-  const { resource } = await database.container(CONTAINER_SCANS)
-    .item(elementId, elementId)
-    .read<OnlineScannedBill>();
+  const { resource } = await database.container(CONTAINER_SCANS).item(elementId, elementId).read<OnlineScannedBill>();
 
   return resource ?? null;
 }
@@ -98,7 +96,11 @@ export async function addPaymentToBill(elementId: string, payment: Omit<PaymentP
     .item(elementId, elementId)
     .patch([
       { op: "incr", path: "/number_of_payments", value: 1 },
-      { op: "add", path: "/payment_items/-", value: { ...payment, index: paymentId } },
+      {
+        op: "add",
+        path: "/payment_items/-",
+        value: { ...payment, index: paymentId }
+      }
     ]);
 
   return paymentId;
@@ -110,7 +112,7 @@ export async function removePaymentFromBill(elementId: string, index: number) {
     .item(elementId, elementId)
     .patch([
       { op: "incr", path: "/number_of_payments", value: -1 },
-      { op: "remove", path: `/payment_items/${index}` },
+      { op: "remove", path: `/payment_items/${index}` }
     ]);
 }
 
@@ -128,7 +130,8 @@ function randomString(length: number): string {
 }
 
 function ensureYMD(input: string) {
-  if (input.length === 10) { // "XXXX-XX-XX"
+  if (input.length === 10) {
+    // "XXXX-XX-XX"
     return input;
   }
 
