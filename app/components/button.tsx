@@ -28,7 +28,7 @@ export function Button({ children, flex, loading, hover, startDecorator, onClick
   return (
     <button className={className} data-hover={hover === true ? true : undefined} onClick={onClick} type={type} style={{ flex }}>
       {loading ? "⏳" : startDecorator}
-      <Typography color="text" fontWeight="400" variant={size === "md" ? "body" : "small"}>
+      <Typography color="text" fontWeight="700" variant={size === "md" ? "body" : "small"}>
         {children}
       </Typography>
     </button>

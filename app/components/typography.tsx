@@ -21,6 +21,12 @@ export const typography = cva({
         fontWeight: 700,
         fontSize: "1.5rem",
       },
+      h3: {
+        color: "text-header",
+        fontFamily: "Lato",
+        fontWeight: 500,
+        fontSize: "1.25rem",
+      },
       body: {
         fontSize: "1rem",
       },

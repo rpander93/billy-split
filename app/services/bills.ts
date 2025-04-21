@@ -52,7 +52,7 @@ export async function findSubmittedBill(elementId: string) {
 }
 
 export async function addScannedBill(element: ScannedBill, file: File): Promise<OnlineScannedBill> {
-  const shareCode = createShareCode(16);
+  const shareCode = randomString(16);
   const fileExtension = file.name.substring(file.name.lastIndexOf("."));
   const fileName = shareCode + fileExtension;
 
@@ -91,7 +91,7 @@ interface PaymentProps {
 export async function addPaymentToBill(elementId: string, payment: Omit<PaymentProps, "index">) {
   const entry = await findSubmittedBill(elementId);
   if (entry === null) throw new Error(`Bill with id "${elementId}" does not exist`);
-  const paymentId = entry.number_of_payments + 1;
+  const paymentId = randomString(16);
 
   await database
     .container(CONTAINER_ENTRIES)
@@ -104,7 +104,17 @@ export async function addPaymentToBill(elementId: string, payment: Omit<PaymentP
   return paymentId;
 }
 
-function createShareCode(length: number): string {
+export async function removePaymentFromBill(elementId: string, index: number) {
+  await database
+    .container(CONTAINER_ENTRIES)
+    .item(elementId, elementId)
+    .patch([
+      { op: "incr", path: "/number_of_payments", value: -1 },
+      { op: "remove", path: `/payment_items/${index}` },
+    ]);
+}
+
+function randomString(length: number): string {
   let result = "";
   const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   const charactersLength = characters.length;
