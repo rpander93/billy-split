@@ -36,6 +36,9 @@ COPY --from=build /www/public /www/public
 COPY --from=build /www/package.json /www/package.json
 COPY --from=build /www/instrumentation.server.mjs /www/instrumentation.server.mjs
 
+RUN apk add --no-cache curl
+
 EXPOSE 3000
 ENV NODE_ENV=production
+HEALTHCHECK CMD curl --fail http://localhost:3000 || exit 1
 CMD ["pnpm", "run", "start"]
