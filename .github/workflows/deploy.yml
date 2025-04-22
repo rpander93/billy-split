@@ -34,7 +34,7 @@ jobs:
 
           # Deploy container
           echo "$REGISTRY_PASSWORD" | docker login $REGISTRY_URL --username $REGISTRY_USERNAME --password-stdin
-          docker push $REGISTRY_URL/billy-split:$REGISTRY_IMAGE_TAG
+          docker push $REGISTRY_URL/billy-split --all-tags
           ssh -i ~/.ssh/deploy_key "$DEPLOY_SSH_SERVER" -p "$DEPLOY_SSH_SERVER_PORT" -l "$DEPLOY_SSH_USERNAME" "cd billy-split; docker rm -f billy-split && docker compose pull && docker compose up -d"
           docker logout
         env:
