@@ -15,7 +15,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
   const item = await findSubmittedBill(shareCode);
   if (item === null) return redirect("/");
 
-  const link = `${import.meta.env.VITE_HTTP_HOST}/entries/${shareCode}`;
+  const link = `${process.env.VITE_HTTP_HOST}/entries/${shareCode}`;
 
   return { link, name: item.name };
 }
