@@ -15,16 +15,17 @@ export async function loader({ params }: LoaderFunctionArgs) {
   const item = await findSubmittedBill(shareCode);
   if (item === null) return redirect("/");
 
-  return { shareCode, name: item.name };
+  const link = `${import.meta.env.VITE_HTTP_HOST}/entries/${shareCode}`;
+
+  return { link, name: item.name };
 }
 
 export default function CreatedPage() {
-  const { name, shareCode } = useLoaderData<typeof loader>();
+  const { name, link } = useLoaderData<typeof loader>();
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isShareAvailable, setIsShareAvailable] = useState(false);
   const [isCopiedToClipboard, setIsCopiedToClipboard] = useState(false);
-  const shareUrl = `${import.meta.env.VITE_HTTP_HOST}/entries/${shareCode}`;
 
   useEffect(() => {
     setIsShareAvailable(navigator.share !== undefined);
@@ -35,13 +36,11 @@ export default function CreatedPage() {
       return;
     }
 
-    QRCode.toCanvas(canvasRef.current, shareUrl, { width: 250 }, (error) => {
-      console.log(error);
-    });
-  }, [shareUrl]);
+    QRCode.toCanvas(canvasRef.current, link, { width: 250 });
+  }, []);
 
   const handleClickCopy = () => {
-    navigator.clipboard.writeText(shareUrl);
+    navigator.clipboard.writeText(link);
     setIsCopiedToClipboard(true);
     setTimeout(() => setIsCopiedToClipboard(false), 750);
   };
@@ -50,7 +49,7 @@ export default function CreatedPage() {
     await navigator?.share?.({
       title: "Billy Split",
       text: `Hey! I'm using Billy to track the bill for "${name}" I paid recently. Can you pay me back?`,
-      url: shareUrl
+      url: link
     });
   };
 
@@ -71,7 +70,7 @@ export default function CreatedPage() {
             Copy link
           </Button>
         )}
-        <LinkButton href={shareUrl} startDecorator="🖱️" variant="secondary" target="_self">
+        <LinkButton href={link} startDecorator="🖱️" variant="secondary" target="_self">
           Open
         </LinkButton>
       </Box>
