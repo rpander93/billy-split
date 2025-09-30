@@ -1,5 +1,5 @@
 {
-  "name": "billy-split-next",
+  "name": "billy-split",
   "private": true,
   "sideEffects": false,
   "type": "module",
@@ -7,12 +7,13 @@
     "postinstall": "panda codegen",
     "build": "remix vite:build",
     "dev": "remix vite:dev",
+    "setup": "node scripts/create-scheme.js",
     "lint": "biome check --formatter-enabled=true --linter-enabled=false --organize-imports-enabled=true --write ./app",
     "start": "cross-env NODE_OPTIONS='--import ./instrumentation.server.mjs' remix-serve ./build/server/index.js",
     "typecheck": "tsc"
   },
   "dependencies": {
-    "@azure/cosmos": "^4.1.1",
+    "mongodb": "^6.3.0",
     "@azure/storage-blob": "^12.25.0",
     "@remix-run/node": "^2.16.5",
     "@remix-run/react": "^2.16.5",
@@ -36,6 +37,7 @@
     "@types/qrcode": "^1.5.5",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
+    "dotenv": "^16.3.1",
     "typescript": "^5.6.3",
     "vite": "^5.4.10",
     "vite-tsconfig-paths": "^4.3.2"

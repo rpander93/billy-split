@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main ]
   pull_request:
-    branches: [ main ] 
+    branches: [ main ]
 
 jobs:
   build:
@@ -32,11 +32,14 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           echo "$DEPLOY_SSH_KEYSCAN" > ~/.ssh/known_hosts
 
-          # Deploy container
+          # Push container to registry
           echo "$REGISTRY_PASSWORD" | docker login $REGISTRY_URL --username $REGISTRY_USERNAME --password-stdin
           docker push $REGISTRY_URL/billy-split --all-tags
-          ssh -i ~/.ssh/deploy_key "$DEPLOY_SSH_SERVER" -p "$DEPLOY_SSH_SERVER_PORT" -l "$DEPLOY_SSH_USERNAME" "cd billy-split; docker rm -f billy-split && docker compose pull && docker compose up -d"
           docker logout
+
+          # Redeploy stack on server
+          scp -i ~/.ssh/deploy_key -P "$DEPLOY_SSH_SERVER_PORT" -l "$DEPLOY_SSH_USERNAME" "docker-compose.prod.yml" "$DEPLOY_SSH_SERVER":~/billy-split/docker-compose.yml
+          ssh -i ~/.ssh/deploy_key "$DEPLOY_SSH_SERVER" -p "$DEPLOY_SSH_SERVER_PORT" -l "$DEPLOY_SSH_USERNAME" "cd billy-split; docker compose pull && docker compose up -d"
         env:
           DEPLOY_SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
           DEPLOY_SSH_KEYSCAN: ${{ secrets.DEPLOY_SSH_KEYSCAN }}

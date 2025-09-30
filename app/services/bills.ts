@@ -1,9 +1,9 @@
 import type { OnlineScannedBill, OnlineSubmittedBill, ScannedBill, SubmittedBill } from "~/types";
-import { database } from "./database";
+import { collection } from "./database";
 import { upload } from "./files";
 
-const CONTAINER_SCANS = process.env.VITE_AZURE_COSMOS_CONTAINER_SCANS as string;
-const CONTAINER_ENTRIES = process.env.VITE_AZURE_COSMOS_CONTAINER_ENTRIES as string;
+const CONTAINER_SCANS = process.env.AZURE_COSMOS_CONTAINER_SCANS as string;
+const CONTAINER_ENTRIES = process.env.AZURE_COSMOS_CONTAINER_ENTRIES as string;
 
 export async function addSubmittedBill(scannedBillId: string, submitted: SubmittedBill) {
   const scanned = await findScannedBill(scannedBillId);
@@ -15,7 +15,7 @@ export async function addSubmittedBill(scannedBillId: string, submitted: Submitt
     .map(({ is_deleted, ...item }, index) => ({
       ...item,
       index,
-      unit_price: item.total_price / item.amount
+      unit_price: item.total_price / item.amount,
     }));
 
   if (submitted.service_fee !== null && submitted.service_fee > 0) {
@@ -24,31 +24,36 @@ export async function addSubmittedBill(scannedBillId: string, submitted: Submitt
       unit_price: submitted.service_fee,
       amount: 1,
       total_price: submitted.service_fee,
-      description: "Service fee"
+      description: "Service fee",
     });
   }
 
+  const entriesCollection = await collection<OnlineSubmittedBill>(CONTAINER_ENTRIES);
+  const scansCollection = await collection<OnlineScannedBill>(CONTAINER_SCANS);
+
+  const submittedBill: OnlineSubmittedBill = {
+    ...scanned,
+    ...submitted,
+    line_items: submittedLineItems,
+    number_of_payments: 0,
+    payment_items: [],
+  };
+
   await Promise.all([
-    database.container(CONTAINER_ENTRIES).items.upsert<OnlineSubmittedBill>({
-      ...scanned,
-      ...submitted,
-      line_items: submittedLineItems,
-      number_of_payments: 0,
-      payment_items: []
+    entriesCollection.replaceOne({ id: scannedBillId }, submittedBill, {
+      upsert: true,
     }),
-    database.container(CONTAINER_SCANS).deleteAllItemsForPartitionKey(scannedBillId)
+    scansCollection.deleteOne({ id: scannedBillId }),
   ]);
 
   return scanned.share_code;
 }
 
-export async function findSubmittedBill(elementId: string) {
-  const { resource } = await database
-    .container(CONTAINER_ENTRIES)
-    .item(elementId, elementId)
-    .read<OnlineSubmittedBill>();
+export async function findSubmittedBill(elementId: string): Promise<OnlineSubmittedBill | null> {
+  const elements = await collection<OnlineSubmittedBill>(CONTAINER_ENTRIES);
+  const result = await elements.findOne({ id: elementId });
 
-  return resource ?? null;
+  return result;
 }
 
 export async function addScannedBill(element: ScannedBill, file: File): Promise<OnlineScannedBill> {
@@ -62,21 +67,20 @@ export async function addScannedBill(element: ScannedBill, file: File): Promise<
     file_name: shareCode + fileExtension,
     created_on: Date.now() / 1000,
     date: element.date !== null ? ensureYMD(element.date) : formatYMD(),
-    share_code: shareCode
+    share_code: shareCode,
   };
 
-  await Promise.all([
-    upload(file, fileName),
-    database.container(CONTAINER_SCANS).items.upsert<OnlineScannedBill>(retVal)
-  ]);
+  const elements = await collection<OnlineScannedBill>(CONTAINER_SCANS);
+  await Promise.all([upload(file, fileName), elements.insertOne(retVal)]);
 
   return retVal;
 }
 
 export async function findScannedBill(elementId: string): Promise<OnlineScannedBill | null> {
-  const { resource } = await database.container(CONTAINER_SCANS).item(elementId, elementId).read<OnlineScannedBill>();
+  const elements = await collection<OnlineScannedBill>(CONTAINER_SCANS);
+  const result = await elements.findOne({ id: elementId });
 
-  return resource ?? null;
+  return result;
 }
 
 interface PaymentProps {
@@ -88,39 +92,52 @@ interface PaymentProps {
 
 export async function addPaymentToBill(elementId: string, payment: Omit<PaymentProps, "index">) {
   const entry = await findSubmittedBill(elementId);
-  if (entry === null) throw new Error(`Bill with id "${elementId}" does not exist`);
-  const paymentId = randomString(16);
 
-  await database
-    .container(CONTAINER_ENTRIES)
-    .item(elementId, elementId)
-    .patch([
-      { op: "incr", path: "/number_of_payments", value: 1 },
-      {
-        op: "add",
-        path: "/payment_items/-",
-        value: { ...payment, index: paymentId }
-      }
-    ]);
+  if (entry === null)
+    throw new Error(`Bill with id "${elementId}" does not exist`);
+
+  const paymentId = randomString(16);
+  const elements = await collection<OnlineSubmittedBill>(CONTAINER_ENTRIES);
+
+  await elements.updateOne(
+    { id: elementId },
+    {
+      $inc: { number_of_payments: 1 },
+      $push: {
+        payment_items: { ...payment, index: paymentId },
+      },
+    },
+  );
 
   return paymentId;
 }
 
 export async function removePaymentFromBill(elementId: string, index: number) {
-  await database
-    .container(CONTAINER_ENTRIES)
-    .item(elementId, elementId)
-    .patch([
-      { op: "incr", path: "/number_of_payments", value: -1 },
-      { op: "remove", path: `/payment_items/${index}` }
-    ]);
+  const elements = await collection<OnlineSubmittedBill>(CONTAINER_ENTRIES);
+
+  // First, get the current document to find the payment item to remove
+  const bill = await elements.findOne({ id: elementId });
+  if (!bill) throw new Error(`Bill with id "${elementId}" does not exist`);
+
+  // Remove the payment item at the specified index
+  const updatedPaymentItems = bill.payment_items.filter((_, i: number) => i !== index);
+
+  await elements.updateOne(
+    { id: elementId },
+    {
+      $inc: { number_of_payments: -1 },
+      $set: { payment_items: updatedPaymentItems },
+    },
+  );
 }
 
 function randomString(length: number): string {
   let result = "";
+
   const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   const charactersLength = characters.length;
   let counter = 0;
+
   while (counter < length) {
     result += characters.charAt(Math.floor(Math.random() * charactersLength));
     counter += 1;

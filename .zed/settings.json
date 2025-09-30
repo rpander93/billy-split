@@ -1,0 +1,10 @@
+{
+  "language_servers": ["vtsls", "biome"],
+  "code_actions_on_format": {
+    "source.fixAll.biome": true,
+    "source.organizeImports.biome": true
+  },
+  "prettier": {
+    "allowed": false
+  }
+}

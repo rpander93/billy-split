@@ -11,6 +11,16 @@ WORKDIR /www
 COPY package.json pnpm-lock.yaml panda.config.ts ./
 RUN pnpm install
 
+## Development stage
+FROM dependencies AS development
+
+WORKDIR /www
+ENV NODE_ENV=development
+RUN pnpm install
+COPY . .
+EXPOSE 3000
+CMD ["pnpm", "run", "dev", "--host"]
+
 ## Build stage
 FROM dependencies AS build
 

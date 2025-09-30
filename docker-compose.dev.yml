@@ -1,0 +1,22 @@
+name: billy-split
+
+services:
+  mongo:
+    image: mongo:latest
+    container_name: billy-split-mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: username
+      MONGO_INITDB_ROOT_PASSWORD: password
+    ports:
+      - 27017:27017
+
+  web:
+    container_name: billy-split-web
+    build:
+      context: .
+      target: development
+    volumes:
+      - .:/www
+      - /www/node_modules
+    ports:
+      - "3000:3000"

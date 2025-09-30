@@ -1,11 +1,25 @@
-import { CosmosClient } from "@azure/cosmos";
+import { MongoClient, type Db, type Collection, type Document } from "mongodb";
 
-const COSMOS_ENDPOINT = process.env.VITE_AZURE_COSMOS_ENDPOINT as string;
-const COSMOS_KEY = process.env.VITE_AZURE_COSMOS_KEY as string;
-const COSMOS_DATABASE = process.env.VITE_AZURE_COSMOS_DATABASE as string;
+const MONGODB_URI = process.env.MONGODB_URI as string;
+const MONGODB_DATABASE = process.env.MONGODB_DATABASE as string;
 
-export const client = new CosmosClient({
-  endpoint: COSMOS_ENDPOINT,
-  key: COSMOS_KEY
-});
-export const database = client.database(COSMOS_DATABASE);
+let _client: MongoClient | undefined;
+let _handle: Db | undefined;
+
+export async function database(): Promise<Db> {
+  if (_client === undefined) {
+    _client = new MongoClient(MONGODB_URI);
+    await _client.connect();
+  }
+
+  // biome-ignore lint: blabla
+  return (_handle = _handle ?? _client.db(MONGODB_DATABASE));
+}
+
+export async function collection<T extends Document>(
+  name: string,
+): Promise<Collection<T>> {
+  const connection = await database();
+
+  return connection.collection<T>(name);
+}

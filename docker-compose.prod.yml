@@ -1,0 +1,32 @@
+name: billy-split
+
+services:
+  mongo:
+    image: mongo:latest
+    container_name: billy-split-mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGODB_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD}
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - billy-split
+
+  web:
+    container_name: billy-split-web
+    build:
+      context: .
+      target: runtime
+    ports:
+      - "3000:3000"
+    networks:
+      - billy-split
+      - external
+
+networks:
+  external:
+    name: external
+    external: true
+  billy-split:
+    name: internal
+    driver: bridge
