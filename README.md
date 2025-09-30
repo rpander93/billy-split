@@ -6,8 +6,28 @@ Billy Split helps managing splitting bills. Imagine you just paid for dinner of 
 
 Users upload a picture of the bill to Billy. Images are processed by [Azure AI Document Intelligence](https://azure.microsoft.com/en-us/products/ai-services/ai-document-intelligence) to extract information. They verify that the scanned information is correct and then save it. They then get a shareable link for others to open the bill and record their payments.
 
+## Setup
+
+### 1. Install Dependencies
+
+```bash
+pnpm install
+```
+
+### 2. Environment Variables
+
+Duplicate `.env.example` into `.env` file in the root root directory and populate the values.
+
+### 3. Database Setup
+
+Create the SQLite file and scheme by running the migrations:
+
+```bash
+pnpm run database:migrate
+```
+
 ## Development
 
-```
+```bash
 pnpm run dev
 ```

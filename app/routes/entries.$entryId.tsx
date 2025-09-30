@@ -8,7 +8,7 @@ import { AmountSelector } from "~/components/amount-selector";
 
 import { Avatar } from "~/components/avatar";
 import { Box } from "~/components/box";
-import { Button, ButtonGroup, LinkButton } from "~/components/button";
+import { Button, ButtonGroup } from "~/components/button";
 import { currency } from "~/components/currency";
 import { Divider } from "~/components/divider";
 import { FormLabel } from "~/components/form-label";
@@ -45,9 +45,8 @@ export async function action({ params, request }: ActionFunctionArgs) {
   try {
     const paymentId = await addPaymentToBill(entryId, {
       creator: result.data.name,
-      created_on: Date.now() / 1000,
       line_items: result.data.items.map((x) => ({
-        line_item_index: x.index,
+        line_item_id: x.id,
         amount: x.amount
       }))
     });
@@ -75,7 +74,7 @@ export default function EntryPage() {
     const selection = items
       .filter((x) => x.mode !== "undecided")
       .map((x) => ({
-        index: x.index,
+        id: x.id,
         amount: x.current_amount
       }));
 
@@ -190,7 +189,7 @@ function LineItemList({
     <Fragment>
       <Box flexDirection="column" rowGap={3} marginY={4}>
         {items.map((element) => (
-          <Fragment key={element.index}>
+          <Fragment key={element.id}>
             <Box flexDirection="column" rowGap={1}>
               <Box flexDirection="row">
                 <Typography color="gray.600" flex={1 / 20}>
@@ -226,8 +225,8 @@ function LineItemList({
                     <AmountSelector
                       label={`I had ${element.current_amount}`}
                       plusDisabled={element.remaining_amount <= 0}
-                      onMinusClick={() => onAmountChange(element.index, -1)}
-                      onPlusClick={() => onAmountChange(element.index, +1)}
+                      onMinusClick={() => onAmountChange(element.id, -1)}
+                      onPlusClick={() => onAmountChange(element.id, +1)}
                     />
                   </Box>
                 ) : element.mode === "splitting" ? (
@@ -236,12 +235,12 @@ function LineItemList({
 
                     <AmountSelector
                       label={`Split by ${element.splitting_denumerator}`}
-                      onMinusClick={() => onSplitChange(element.index, -1)}
-                      onPlusClick={() => onSplitChange(element.index, +1)}
+                      onMinusClick={() => onSplitChange(element.id, -1)}
+                      onPlusClick={() => onSplitChange(element.id, +1)}
                     />
                   </Box>
                 ) : element.remaining_amount > 0 ? (
-                  <button className={addMeButtonCss} onClick={() => onItemClick(element.index)} type="button">
+                  <button className={addMeButtonCss} onClick={() => onItemClick(element.id)} type="button">
                     <Typography fontSize="md">I had this ✋</Typography>
                   </button>
                 ) : (
@@ -292,14 +291,14 @@ function PaymentList({ bill, totalAmount, selectionAmount, remainingAmount }: Pa
           bill.payment_items.map((item, index) => {
             const totalAmount = sum(
               item.line_items.map((x) => {
-                const y = bill.line_items.find((z) => z.index === x.line_item_index);
+                const y = bill.line_items.find((z) => z.id === x.line_item_id);
 
                 return x.amount * (y?.unit_price ?? 0);
               })
             );
 
             return (
-              <Fragment key={item.index ?? index}>
+              <Fragment key={item.id ?? index}>
                 <Box flexDirection="column">
                   <Box alignItems="center" flexDirection="row" columnGap={4}>
                     <Avatar name={item.creator} />
@@ -310,10 +309,10 @@ function PaymentList({ bill, totalAmount, selectionAmount, remainingAmount }: Pa
 
                   <Box flexDirection="column" marginStart={4} marginTop={2}>
                     {item.line_items.map((element) => {
-                      const y = bill.line_items.find((z) => z.index === element.line_item_index);
+                      const y = bill.line_items.find((z) => z.id === element.line_item_id);
 
                       return (
-                        <Box key={element.line_item_index}>
+                        <Box key={element.line_item_id}>
                           <Typography color="gray.600" flex={1 / 10} fontSize="sm">
                             {formatDecimal(element.amount)}
                           </Typography>
@@ -355,7 +354,7 @@ function useItems(bill: OnlineSubmittedBill) {
   const [items, setItems] = useState(() => parseServerToSelectionState(bill));
 
   const amountChange = (index: number, change: number) => {
-    const itemIndex = items.findIndex((element) => element.index === index);
+    const itemIndex = items.findIndex((element) => element.id === index);
     const item = items[itemIndex];
 
     const amount_change = round(item.current_amount + change);
@@ -373,7 +372,7 @@ function useItems(bill: OnlineSubmittedBill) {
   };
 
   const split = (index: number) => {
-    const itemIndex = items.findIndex((element) => element.index === index);
+    const itemIndex = items.findIndex((element) => element.id === index);
     const item = items[itemIndex];
 
     const remaining_amount = item.amount - item.prior_amount;
@@ -392,7 +391,7 @@ function useItems(bill: OnlineSubmittedBill) {
   };
 
   const splitChange = (index: number, change: number) => {
-    const itemIndex = items.findIndex((element) => element.index === index);
+    const itemIndex = items.findIndex((element) => element.id === index);
     const item = items[itemIndex];
 
     const remaining_amount = item.amount - item.prior_amount;
@@ -433,7 +432,7 @@ const submitShape = z.object({
   name: z.string(),
   items: z.array(
     z.object({
-      index: z.number(),
+      id: z.number(),
       amount: z.number()
     })
   )

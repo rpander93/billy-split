@@ -1,0 +1,15 @@
+name: billy-split
+
+services:
+  web:
+    container_name: billy-split-web
+    build:
+      context: .
+      target: development
+    environment:
+      - SQLITE_DATABASE_PATH=/www/billy-split.db
+    volumes:
+      - .:/www
+      - /www/node_modules
+    ports:
+      - "3000:3000"

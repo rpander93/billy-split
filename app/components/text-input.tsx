@@ -20,7 +20,8 @@ export const inputCss = cva({
       outlineColor: "gray.500"
     },
     _readOnly: {
-      cursor: "not-allowed"
+      cursor: "not-allowed",
+      opacity: 0.5,
     }
   },
   variants: {
