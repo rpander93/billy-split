@@ -38,17 +38,18 @@ export interface OnlineSubmittedBill extends Omit<SubmittedBill, "line_items"> {
   share_code: string;
   number_of_payments: number;
   line_items: Array<{
-    index: number;
+    id: number;
     description: string;
     amount: number;
     unit_price: number;
   }>;
   payment_items: Array<{
-    index: number | string;
+    id: number | string;
     creator: string;
     created_on: number;
+    share_code: string;
     line_items: Array<{
-      line_item_index: number;
+      line_item_id: number;
       amount: number;
     }>;
   }>;

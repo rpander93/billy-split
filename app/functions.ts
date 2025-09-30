@@ -102,7 +102,7 @@ export function parseServerToSelectionState(bill: OnlineSubmittedBill) {
   const stateItems = bill.line_items.map((element) => {
     const payment_items = bill.payment_items
       .map((payment_item) => {
-        const line_items = payment_item.line_items.filter((payment) => payment.line_item_index === element.index);
+        const line_items = payment_item.line_items.filter((payment) => payment.line_item_id === element.id);
 
         return {
           creator: payment_item.creator,
@@ -135,7 +135,7 @@ export function parseServerToSelectionState(bill: OnlineSubmittedBill) {
       return 1;
     }
 
-    return a.index - b.index > 0 ? 1 : -1;
+    return a.id - b.id > 0 ? 1 : -1;
   });
 }
 
@@ -144,7 +144,7 @@ export const calculate = {
     items.reduce((accumulator, current) => accumulator + current.amount * current.unit_price, 0),
   current: (bill: OnlineSubmittedBill, items: ReturnType<typeof parseServerToSelectionState>) =>
     items.reduce((accumulator, current) => {
-      const lineItem = bill.line_items.find((l) => l.index === current.index);
+      const lineItem = bill.line_items.find((l) => l.id === current.id);
 
       if (lineItem === undefined) {
         return accumulator;
@@ -158,7 +158,7 @@ export const calculate = {
         accumulator +
         sum(
           current.line_items.map((line_item) => {
-            const item = bill.line_items.find((x_item) => x_item.index === line_item.line_item_index);
+            const item = bill.line_items.find((x_item) => x_item.id === line_item.line_item_id);
             if (!item) return 0;
 
             return item.unit_price * line_item.amount;

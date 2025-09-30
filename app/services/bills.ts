@@ -5,10 +5,10 @@ import { database } from "./database";
 import { upload } from "./files";
 
 interface PaymentProps {
-  index: number | string;
+  id: number;
   creator: string;
   line_items: Array<{
-    line_item_index: number;
+    line_item_id: number;
     amount: number;
   }>;
 }
@@ -26,7 +26,7 @@ export async function addSubmittedBill(scannedBillShareCode: string, submitted: 
   await connection.transaction().execute(async (scope) => {
     // Insert root entity
     const [bill] = await scope
-      .insertInto("submitted_bills")
+      .insertInto("submitted_bill")
       .values({
         name: submitted.name,
         date: submitted.date,
@@ -44,26 +44,24 @@ export async function addSubmittedBill(scannedBillShareCode: string, submitted: 
     // Insert line items
     const values = submitted.line_items
       .filter((x) => !x.is_deleted)
-      .map((x, index) => ({
-        bill_id: bill.id,
-        item_index: index,
+      .map(x => ({
+        bill_id: bill.id as number,
         description: x.description,
         amount: x.amount,
-        unit_price: Math.round(x.total_price / x.amount)
+        unit_price: x.total_price / x.amount,
       }));
 
     await scope
-      .insertInto("submitted_bill_line_items")
+      .insertInto("submitted_bill_line_item")
       .values(values)
       .execute();
 
     // Add service fee if present
     if (submitted.service_fee !== null && submitted.service_fee > 0) {
       await scope
-        .insertInto("submitted_bill_line_items")
+        .insertInto("submitted_bill_line_item")
         .values({
-          bill_id: bill.id,
-          item_index: submitted.line_items.length,
+          bill_id: bill.id as number,
           description: "Service fee",
           amount: 1,
           unit_price: submitted.service_fee
@@ -73,7 +71,7 @@ export async function addSubmittedBill(scannedBillShareCode: string, submitted: 
 
     // Remove from scanned_bills
     await scope
-      .deleteFrom("scanned_bills")
+      .deleteFrom("scanned_bill")
       .where("id", "=", scanned.id)
       .execute();
   });
@@ -86,7 +84,7 @@ export async function findSubmittedBill(shareCode: string): Promise<OnlineSubmit
 
   // Get main bill data
   const bill = await connection
-    .selectFrom("submitted_bills")
+    .selectFrom("submitted_bill")
     .selectAll()
     .where("share_code", "=", shareCode)
     .executeTakeFirst();
@@ -97,40 +95,41 @@ export async function findSubmittedBill(shareCode: string): Promise<OnlineSubmit
 
   // Get line items
   const lineItems = await connection
-    .selectFrom("submitted_bill_line_items")
-    .select(["item_index", "description", "amount", "unit_price"])
+    .selectFrom("submitted_bill_line_item")
+    .select(["id", "description", "amount", "unit_price"])
     .where("bill_id", "=", bill.id)
-    .orderBy("item_index")
+    .orderBy("id")
     .execute();
 
   // Get payment line items
   const paymentLineItems = await connection
-    .selectFrom("payment_item_line_items as li")
-    .innerJoin("payment_items as pi", "li.payment_item_id", "pi.id")
-    .select(["pi.id as payment_id", "pi.payment_index", "pi.bill_id", "pi.created_on", "pi.creator"])
-    .select(["li.payment_item_id", "li.line_item_index", "li.amount"])
+    .selectFrom("payment_line_item as li")
+    .innerJoin("payment as pi", "li.payment_id", "pi.id")
+    .select(["pi.id as payment_id", "pi.bill_id", "pi.created_on", "pi.creator", "pi.share_code"])
+    .select(["li.line_item_id", "li.amount"])
     .where("pi.bill_id", "=", bill.id)
     .execute();
 
   // Map data
-  const groupedOnPaymentId = Object.groupBy(paymentLineItems, (item) => item.payment_id);
+  const groupedOnPaymentId = Object.groupBy(paymentLineItems, (item) => item.payment_id as number);
   const mappedPaymentItems = Object.entries(groupedOnPaymentId).map(([_, payments]) => {
     if (payments === undefined) throw new Error("Cannot proceed without `payments`");
     const payment0 = payments[0];
 
     return {
-      index: payment0.payment_index,
+      id: payment0.payment_id as number,
       creator: payment0.creator,
       created_on: payment0.created_on,
+      share_code: payment0.share_code,
       line_items: (payments ?? []).map(payment => ({
-        line_item_index: payment.line_item_index,
+        line_item_id: payment.line_item_id,
         amount: payment.amount
       })),
     };
   });
 
   return {
-    id: bill.id,
+    id: bill.id as number,
     name: bill.name,
     date: bill.date,
     currency: bill.currency,
@@ -141,7 +140,7 @@ export async function findSubmittedBill(shareCode: string): Promise<OnlineSubmit
     created_on: bill.created_on,
     number_of_payments: bill.number_of_payments,
     line_items: lineItems.map((item) => ({
-      index: item.item_index,
+      id: item.id as number,
       description: item.description,
       amount: item.amount,
       unit_price: item.unit_price
@@ -156,7 +155,7 @@ export async function addScannedBill(element: ScannedBill, file: File): Promise<
 
   await database().transaction().execute(async scope => {
     const [output] = await scope
-      .insertInto("scanned_bills")
+      .insertInto("scanned_bill")
       .values({
         name: element.name,
         date: element.date ?? format(new Date(), "yyyy-MM-dd"),
@@ -169,14 +168,14 @@ export async function addScannedBill(element: ScannedBill, file: File): Promise<
       .execute();
 
     const items = element.line_items.map(line_item => ({
-      bill_id: output.id,
+      bill_id: output.id as number,
       description: line_item.description,
       amount: line_item.amount,
       total_price: line_item.total_price
     }));
 
     await scope
-      .insertInto("scanned_bill_line_items")
+      .insertInto("scanned_bill_line_item")
       .values(items)
       .execute();
 
@@ -191,7 +190,7 @@ export async function findScannedBill(shareCode: string): Promise<OnlineScannedB
 
   // Get main bill data
   const bill = await connection
-    .selectFrom("scanned_bills")
+    .selectFrom("scanned_bill")
     .selectAll()
     .where("share_code", "=", shareCode)
     .executeTakeFirst();
@@ -202,14 +201,14 @@ export async function findScannedBill(shareCode: string): Promise<OnlineScannedB
 
   // Get line items
   const lineItems = await connection
-    .selectFrom("scanned_bill_line_items")
+    .selectFrom("scanned_bill_line_item")
     .select(["description", "amount", "total_price"])
     .where("bill_id", "=", bill.id)
     .orderBy("id")
     .execute();
 
   return {
-    id: bill.id,
+    id: bill.id as number,
     name: bill.name,
     date: bill.date ?? format(new Date(), "yyyy-MM-dd"),
     currency: bill.currency,
@@ -220,7 +219,7 @@ export async function findScannedBill(shareCode: string): Promise<OnlineScannedB
   };
 }
 
-export async function addPaymentToBill(shareCode: string, payment: Omit<PaymentProps, "index">) {
+export async function addPaymentToBill(shareCode: string, payment: Omit<PaymentProps, "id">) {
   const entry = await findSubmittedBill(shareCode);
   if (entry === null) throw new Error(`Bill with share code "${shareCode}" does not exist`);
 
@@ -228,33 +227,26 @@ export async function addPaymentToBill(shareCode: string, payment: Omit<PaymentP
   const connection = database();
 
   await connection.transaction().execute(async scope => {
-    await scope
-      .insertInto("payment_items")
+    const [result] = await scope
+      .insertInto("payment")
       .values({
-        bill_id: entry.id,
-        payment_index: paymentId,
+        bill_id: entry.id as number,
+        share_code: paymentId,
         creator: payment.creator,
         created_on: Date.now()
       })
+      .returningAll()
       .execute();
-
-    // Get the inserted payment ID
-    const { id: insertedPaymentId } = await scope
-      .selectFrom("payment_items")
-      .select("id")
-      .where("bill_id", "=", entry.id)
-      .where("payment_index", "=", paymentId)
-      .executeTakeFirstOrThrow();
 
     // Insert payment line items
     const lineItems = payment.line_items.map(item => ({
-      payment_item_id: insertedPaymentId,
-      line_item_index: item.line_item_index,
+      payment_id: result.id as number,
+      line_item_id: item.line_item_id,
       amount: item.amount
     }));
 
     await scope
-      .insertInto("payment_item_line_items")
+      .insertInto("payment_line_item")
       .values(lineItems)
       .execute();
   });
@@ -262,20 +254,20 @@ export async function addPaymentToBill(shareCode: string, payment: Omit<PaymentP
   return paymentId;
 }
 
-export async function removePaymentFromBill(shareCode: string, index: string) {
-  const bill = await findSubmittedBill(shareCode);
-  if (bill === null) throw new Error(`Bill with share code "${shareCode}" does not exist`);
+export async function removePaymentFromBill(billShareCode: string, paymentShareCode: string) {
+  const bill = await findSubmittedBill(billShareCode);
+  if (bill === null) throw new Error(`Bill with share code "${billShareCode}" does not exist`);
 
   await database().transaction().execute(async scope => {
     const payment = await scope
-      .selectFrom("payment_items")
+      .selectFrom("payment")
       .select("id")
       .where("bill_id", "=", bill.id)
-      .where("payment_index", "=", index)
+      .where("share_code", "=", paymentShareCode)
       .executeTakeFirstOrThrow();
 
     await scope
-      .deleteFrom("payment_items")
+      .deleteFrom("payment")
       .where("id", "=", payment.id)
       .execute();
   });

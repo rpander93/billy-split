@@ -12,7 +12,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
 
   const paidAmount = sum(
     payment.line_items.map((x) => {
-      const item = bill.line_items.find((y) => x.line_item_index === y.index);
+      const item = bill.line_items.find((y) => x.line_item_id === y.id);
       return x.amount * (item?.unit_price ?? 0);
     })
   );
@@ -81,7 +81,7 @@ async function load(billId: string, paymentId: string) {
   const bill = await findSubmittedBill(billId);
   if (null === bill) throw redirect("/");
 
-  const payment = bill.payment_items.find((x) => x.index === paymentId);
+  const payment = bill.payment_items.find((x) => x.share_code === paymentId);
   if (undefined === payment) throw redirect("/");
 
   return [bill, payment] as const;
