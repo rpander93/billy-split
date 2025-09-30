@@ -53,7 +53,7 @@ export async function action({ request }: ActionFunctionArgs) {
     const result = await extractor(image);
     const queued = await addScannedBill(result, image);
 
-    return redirect(`/create/${queued.id}`);
+    return redirect(`/create/${queued.share_code}`);
   } catch (error) {
     throw new Response((error as Error).message ?? "Woops. Something went wrong. Please try again.", { status: 502 });
   }

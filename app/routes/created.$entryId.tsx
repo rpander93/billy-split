@@ -37,7 +37,7 @@ export default function CreatedPage() {
     }
 
     QRCode.toCanvas(canvasRef.current, link, { width: 250 });
-  }, []);
+  }, [link]);
 
   const handleClickCopy = () => {
     navigator.clipboard.writeText(link);

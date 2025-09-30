@@ -37,7 +37,11 @@ export async function loader({ params }: LoaderFunctionArgs) {
 export async function action({ params, request }: ActionFunctionArgs) {
   const input_ = parseFormData(await request.formData());
   const result = submitShape.safeParse(input_);
-  if (false === result.success) throw new Response("Invalid form data received", { status: 400 });
+
+  if (false === result.success) {
+    console.error(result.error);
+    throw new Response("Invalid form data received", { status: 400 });
+  }
 
   const input = result.data as SubmittedBill;
   const shareCode = await addSubmittedBill(params.entryId as string, input);
@@ -151,17 +155,21 @@ export default function CreatePage() {
                   setItems((current) => current.filter((_x, _xindex) => _xindex !== index));
                 } else {
                   const isDeleted = !item.is_deleted;
-                  document.querySelector(`input[name="line_items[${index}][is_deleted]"]`)!.value = isDeleted;
+
+                  const querySelector = document.querySelector(`input[name="line_items[${index}][is_deleted]"]`) as HTMLInputElement;
+                  if (querySelector?.value) querySelector.value = isDeleted ? "1" : "0";
+
                   setItems((current) => current.with(index, { ...item, is_deleted: isDeleted }));
                 }
               };
 
               return (
+                // biome-ignore lint: `index` is valuable here
                 <Fragment key={index}>
                   <Box alignItems="center" flexDirection="row" columnGap={2}>
                     <TextInput
                       defaultValue={String(item.amount)}
-                      disabled={item.is_deleted}
+                      readOnly={item.is_deleted}
                       inputMode="numeric"
                       name={`line_items[${index}][amount]`}
                       onBlur={handleChangeAmount}
@@ -174,7 +182,7 @@ export default function CreatePage() {
                     />
                     <TextInput
                       defaultValue={item.description}
-                      disabled={item.is_deleted}
+                      readOnly={item.is_deleted}
                       name={`line_items[${index}][description]`}
                       onBlur={handleChangeDescription}
                       placeholder="Item"
@@ -190,7 +198,7 @@ export default function CreatePage() {
                           ? formatCurrencyWithoutSymbol(item.total_price)
                           : item.total_price
                       }
-                      disabled={item.is_deleted}
+                      readOnly={item.is_deleted}
                       marginLeft="auto"
                       name={`line_items[${index}][total_price]`}
                       onBlur={handleChangeTotalPrice}

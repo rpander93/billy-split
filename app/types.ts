@@ -10,7 +10,7 @@ export interface ScannedBill {
 }
 
 export interface OnlineScannedBill extends ScannedBill {
-  id: string;
+  id: number;
   created_on: number;
   date: string;
   share_code: string;
@@ -32,7 +32,7 @@ export interface SubmittedBill {
 }
 
 export interface OnlineSubmittedBill extends Omit<SubmittedBill, "line_items"> {
-  id: string;
+  id: number;
   file_name: string;
   created_on: number;
   share_code: string;

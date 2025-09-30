@@ -8,7 +8,7 @@ import { AmountSelector } from "~/components/amount-selector";
 
 import { Avatar } from "~/components/avatar";
 import { Box } from "~/components/box";
-import { Button, ButtonGroup, LinkButton } from "~/components/button";
+import { Button, ButtonGroup } from "~/components/button";
 import { currency } from "~/components/currency";
 import { Divider } from "~/components/divider";
 import { FormLabel } from "~/components/form-label";
@@ -45,7 +45,6 @@ export async function action({ params, request }: ActionFunctionArgs) {
   try {
     const paymentId = await addPaymentToBill(entryId, {
       creator: result.data.name,
-      created_on: Date.now() / 1000,
       line_items: result.data.items.map((x) => ({
         line_item_index: x.index,
         amount: x.amount

@@ -1,17 +1,6 @@
 name: billy-split
 
 services:
-  mongo:
-    image: mongo:latest
-    container_name: billy-split-mongo
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGODB_USERNAME}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD}
-    volumes:
-      - mongo_data:/data/db
-    networks:
-      - billy-split
-
   web:
     container_name: billy-split-web
     build:
@@ -19,9 +8,20 @@ services:
       target: runtime
     ports:
       - "3000:3000"
+    environment:
+      - SQLITE_DATABASE_PATH=/app/data/billy-split.db
+      - VITE_AZURE_STORAGE_ACCOUNT_NAME=${VITE_AZURE_STORAGE_ACCOUNT_NAME}
+      - VITE_AZURE_STORAGE_CONTAINER_NAME=${VITE_AZURE_STORAGE_CONTAINER_NAME}
+      - VITE_AZURE_STORAGE_SAS_TOKEN=${VITE_AZURE_STORAGE_SAS_TOKEN}
+    volumes:
+      - sqlite_data:/app/data
     networks:
       - billy-split
       - external
+
+volumes:
+  sqlite_data:
+    driver: local
 
 networks:
   external:

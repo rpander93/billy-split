@@ -26,11 +26,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
 
 export async function action({ params }: ActionFunctionArgs) {
   const [bill, _] = await load(params.entryId as string, params.paymentId as string);
-
-  // intentionally using `==` here to allow for both string and number types
-  // eslint-disable-next-line eqeqeq
-  const index = bill.payment_items.findIndex((x) => x.index == params.paymentId);
-  await removePaymentFromBill(bill.id, index);
+  await removePaymentFromBill(bill.share_code, params.paymentId as string);
 
   return redirect(`/entries/${params.entryId}`);
 }
@@ -85,9 +81,7 @@ async function load(billId: string, paymentId: string) {
   const bill = await findSubmittedBill(billId);
   if (null === bill) throw redirect("/");
 
-  // intentionally using `==` here to allow for both string and number types
-  // eslint-disable-next-line eqeqeq
-  const payment = bill.payment_items.find((x) => x.index == paymentId);
+  const payment = bill.payment_items.find((x) => x.index === paymentId);
   if (undefined === payment) throw redirect("/");
 
   return [bill, payment] as const;

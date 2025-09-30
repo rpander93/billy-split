@@ -1,20 +1,13 @@
 name: billy-split
 
 services:
-  mongo:
-    image: mongo:latest
-    container_name: billy-split-mongo
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: username
-      MONGO_INITDB_ROOT_PASSWORD: password
-    ports:
-      - 27017:27017
-
   web:
     container_name: billy-split-web
     build:
       context: .
       target: development
+    environment:
+      - SQLITE_DATABASE_PATH=/www/billy-split.db
     volumes:
       - .:/www
       - /www/node_modules

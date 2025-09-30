@@ -55,7 +55,7 @@ export function formatDecimal(decimal: number) {
 
   // Handle negative numbers
   const sign = decimal < 0 ? "-" : "";
-  decimal = Math.abs(decimal);
+  const absDecimal = Math.abs(decimal);
 
   // Maximum denominator to consider for approximation
   const precision = 1.0e-10;
@@ -63,12 +63,12 @@ export function formatDecimal(decimal: number) {
 
   let bestNumerator = 1;
   let bestDenominator = 1;
-  let bestError = Math.abs(decimal - bestNumerator / bestDenominator);
+  let bestError = Math.abs(absDecimal - bestNumerator / bestDenominator);
 
   for (let denominator = 1; denominator <= maxDenominator; denominator++) {
     // Calculate the closest numerator for this denominator
-    const numerator = Math.round(decimal * denominator);
-    const error = Math.abs(decimal - numerator / denominator);
+    const numerator = Math.round(absDecimal * denominator);
+    const error = Math.abs(absDecimal - numerator / denominator);
 
     if (error < bestError) {
       bestError = error;
@@ -92,11 +92,7 @@ export function formatDecimal(decimal: number) {
     const wholeNumber = Math.floor(bestNumerator / bestDenominator);
     const remainder = bestNumerator % bestDenominator;
 
-    if (remainder === 0) {
-      return `${sign}${wholeNumber}`;
-    } else {
-      return `${sign}${wholeNumber} ${remainder}/${bestDenominator}`;
-    }
+    return remainder === 0 ? `${sign}${wholeNumber}` : `${sign}${wholeNumber} ${remainder}/${bestDenominator}`;
   }
 
   return `${sign}${bestNumerator}/${bestDenominator}`;
@@ -162,7 +158,8 @@ export const calculate = {
         accumulator +
         sum(
           current.line_items.map((line_item) => {
-            const item = bill.line_items.find((x_item) => x_item.index === line_item.line_item_index)!;
+            const item = bill.line_items.find((x_item) => x_item.index === line_item.line_item_index);
+            if (!item) return 0;
 
             return item.unit_price * line_item.amount;
           })
@@ -178,4 +175,19 @@ export function parsePaymentMethod(paymentMethod: SubmittedBill["payment_method"
   return paymentMethod.startsWith("https://") || paymentMethod.startsWith("http://")
     ? { url: true, value: paymentMethod }
     : { url: false, value: paymentMethod };
+}
+
+export function randomString(length: number): string {
+  let result = "";
+
+  const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  const charactersLength = characters.length;
+  let counter = 0;
+
+  while (counter < length) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    counter += 1;
+  }
+
+  return result;
 }
