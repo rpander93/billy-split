@@ -40,7 +40,6 @@ jobs:
           docker logout
 
           # Redeploy stack on server
-          scp -i ~/.ssh/deploy_key -P "$DEPLOY_SSH_SERVER_PORT" "docker-compose.prod.yml" "$DEPLOY_SSH_USERNAME@$DEPLOY_SSH_SERVER":~/billy-split/docker-compose.yml
           ssh -i ~/.ssh/deploy_key -p "$DEPLOY_SSH_SERVER_PORT" -l "$DEPLOY_SSH_USERNAME" "$DEPLOY_SSH_SERVER" "cd billy-split; docker compose pull && docker compose up -d"
         env:
           DEPLOY_SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
