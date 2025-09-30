@@ -16,21 +16,7 @@ pnpm install
 
 ### 2. Environment Variables
 
-Create a `.env` file in the root directory with the following variables:
-
-#### SQLite Configuration
-```env
-SQLITE_DATABASE_PATH=./billy-split.db
-```
-
-The SQLite database file will be created automatically in your project directory. You can specify a different path if needed.
-
-#### Azure Storage (for file uploads)
-```env
-VITE_AZURE_STORAGE_ACCOUNT_NAME=your_storage_account
-VITE_AZURE_STORAGE_CONTAINER_NAME=your_container
-VITE_AZURE_STORAGE_SAS_TOKEN=your_sas_token
-```
+Duplicate `.env.example` into `.env` file in the root root directory and populate the values.
 
 ### 3. Database Setup
 
