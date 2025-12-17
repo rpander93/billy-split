@@ -36,7 +36,10 @@ const REQUEST_SCHEME = z.object({
 });
 
 export const meta: MetaFunction = () => {
-  return [{ title: "Billy Split" }, { name: "description", content: "Welcome to Remix!" }];
+  return [
+    { title: "Billy Split - Split bills with anyone" },
+    { name: "description", content: "Billy Split allows you to upload a bill and split it with anyone. Just send the provided link to your friends and watch them pay their share. It's easy and secure." }
+  ];
 };
 
 export function loader() {
@@ -88,7 +91,7 @@ export default function LandingPage() {
       <Logo />
 
       <Box flexDirection="column">
-        <Typography variant="h1">Want to split a bill?</Typography>
+        <Typography as="h1" variant="h1">Want to split a bill?</Typography>
         <Typography variant="body">
           Billy helps you keep track of who paid you back per line item. Select an image showing the bill to get
           started! 💰💸
@@ -128,7 +131,7 @@ export default function LandingPage() {
               </Box>
 
               <Box flexDirection="column">
-                <Typography variant="h2">How it works</Typography>
+                <Typography as="h2" variant="h2">How it works</Typography>
                 <Typography variant="body">
                   <ol className={css({ listStyle: "number", marginLeft: 4 })}>
                     <li>Pick an image showing the bill</li>

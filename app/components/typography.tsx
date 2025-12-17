@@ -1,5 +1,6 @@
 import { cva } from "~/styled-system/css";
 import { styled } from "~/styled-system/jsx";
+import type { HTMLStyledProps, JsxElements, RecipeVariantProps } from "~/styled-system/types";
 
 export const typography = cva({
   base: {
@@ -42,4 +43,15 @@ export const typography = cva({
   }
 });
 
-export const Typography = styled("span", typography);
+type VariantConfig = Exclude<RecipeVariantProps<typeof typography>, undefined>;
+
+type TypographyProps<T extends keyof JsxElements = "span"> = HTMLStyledProps<T> & VariantConfig & {
+  as?: T;
+}
+
+export function Typography({ as = "span", variant = "body", ...restProps }: TypographyProps) {
+  const typographyStyles = typography({ variant });
+  const Component = styled[as];
+
+  return <Component {...restProps} className={typographyStyles} />;
+}

@@ -55,7 +55,7 @@ export default function CreatedPage() {
 
   return (
     <Box flexDirection="column" justifyContent="center" rowGap={4}>
-      <Typography variant="h2">{`👏 Great! We saved your bill for “${name}”`}</Typography>
+      <Typography as="h2" variant="h2">{`👏 Great! We saved your bill for “${name}”`}</Typography>
 
       <Box flexDirection="column" rowGap={2}>
         {isShareAvailable && (

@@ -96,7 +96,7 @@ export default function CreatePage() {
     <Form autoComplete="off" method="POST">
       <Box flexDirection="column" justifyContent="center" rowGap={4}>
         <Box flexDirection="column">
-          <Typography variant="h2">👌 Here’s the items we found</Typography>
+          <Typography as="h2" variant="h2">👌 Here’s the items we found</Typography>
           <Typography>You can correct any mistakes by tapping the item. Or add and remove items.</Typography>
         </Box>
 
